@@ -198,7 +198,7 @@ class GRSModel:
         if self.mode=="update":
             b=descriptors[:,self.mask]
             self.update(b)
-
+#lammps simulation
 class GRSSampler:
     def __init__(self, model, before_loading_init):
         self.model=model
@@ -232,13 +232,14 @@ try:
     os.mkdir(data_path)
 except:
     pass
+#starts lammps and grs model area 
 lmpi = lammps.lammps(cmdargs=['-screen','none'])
 activate_mliappy(lmpi)
 em=GRSModel(nelements,n_descs,mask=mask)
 # use internal structure generator to build candidates
 atoms_basic= bulk('Ta',cubic=True)*(3,3,3)#read('ats_00057.cif')#internal_generate_cell(0,desired_size=vnp.random.choice(range(mincellsize,maxcellsize)),template=None,desired_comps=target_comps,use_template=None,min_typ=min_typ_global,soft_strength=soft_strength)
 print('pos',atoms_basic.positions)
-atoms_basic.rattle(stdev=0.5,seed=vnp.random.randint(40000))
+atoms_basic.rattle(stdev=0.5,seed=vnp.random.randint(40000)) #rattle adds displacement
 print('pos2',atoms_basic.positions)
 #g= internal_basic(atoms_basic,index=0,min_typ=None,soft_strength=1.0)
 #g = internal_generate_cell(0,desired_size=vnp.random.choice(range(mincellsize,maxcellsize)),template=atoms_basic,desired_comps=target_comps,use_template=atoms_basic,min_typ=min_typ_global,soft_strength=soft_strength)
@@ -248,6 +249,8 @@ sampler=GRSSampler(em,g)
 print ('after sampler')
 sampler.update_model()
 
+#needs to be added to refactor -- to compare multiple structures
+#loop for
 i=1
 while i <= n_totconfig:
     print(i,"/",n_totconfig,"Using indicies :",mask)
@@ -259,14 +262,14 @@ while i <= n_totconfig:
     sampler=GRSSampler(em,g)
     em.K_cross=cross_weight
     em.K_self=self_weight
-    if run_temp:
+    if run_temp:  #temperature simulation
         if dump_relax:
             sampler.run("dump    r%d all xyz 1 dyn_%d.xyz" %(i,i))
         sampler.run('velocity all create 800.0 4928459 loop geom')
         sampler.run("fix  a1  all nve")
         sampler.run("run 1000")
         sampler.run("unfix  a1")
-    if fire_min:
+    if fire_min: #energy minimize
         sampler.run("min_style  fire")
         sampler.run("""min_modify integrator eulerexplicit tmax 10.0 tmin 0.0 delaystep 5 dtgrow 1.1 dtshrink 0.5 alpha0 0.1 alphashrink 0.99 vdfmax 100000 halfstepback no initialdelay no""")
     if line_min:
@@ -281,7 +284,8 @@ while i <= n_totconfig:
     sampler.run("minimize 1e-12 1e-12 10000 100000")
     sampler.run("write_data %s/sample.%i.dat " % (data_path,i) )
     sampler.update_model()
-
+#how is model updated? 
+    #TODO: Look at how to add to refactor ( update_model )
     i+=1
 
 

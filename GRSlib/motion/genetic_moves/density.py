@@ -51,5 +51,25 @@ def remove_atom(atoms,symbols,tol = 0.5):
     blmin = closest_distances_generator(atom_numbers=[atomic_numbers[symbol] for symbol in symbols] + [atomic_numbers['Ne']], ratio_of_covalent_radii=0.5)
     return atoms
 
-def change_cell():
-    return atoms
+
+def change_cell(): #change cell size through scale variable.
+    cell = atoms.get_cell() #current cell
+    new_atoms = atoms.copy()
+    new_cell = cell * scale
+    new_atoms.set_cell(new_cell, scale_atoms=True) #scale with wanted density
+    return new_atoms 
+
+#change cell
+
+#Change density but keep crystals structure polyhedral template to show what map hit is
+
+#Change volume
+
+#Cell is the box that has the atoms
+
+#Change cell - lets them change the ase atoms object - a variable that could scale the object by
+
+# ase doc note
+# --get_cell(complete=False)[source]
+#Get the three unit cell vectors as a  :ase.cell.Cell` object.
+#The Cell object resembles a 3x3 ndarray, and cell[i, j] is the jth Cartesian coordinate of the ith cell vector.
