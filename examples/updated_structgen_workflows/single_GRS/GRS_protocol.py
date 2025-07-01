@@ -98,11 +98,11 @@ class GRSModel:
 
     def update(self,d):
         if self.n_elements > 1:
-            dft=d.flatten()
+            dft=d.flatten() #if there is more than 1 element, .flatten turns it into a 1d array
         else:
             dft = d
-        self.q_count += dft.shape[0]
-        self.sum+=vnp.sum(dft,axis=0)
+        self.q_count += dft.shape[0] #q_count is updated with # of elements
+        self.sum+=vnp.sum(dft,axis=0) #
         self.sumsq+=vnp.sum(dft*dft,axis=0)
         self.set_mode_run()
 
@@ -213,7 +213,7 @@ class GRSSampler:
         self.lmp.commands_string("variable ptot equal press")
         self.lmp.commands_string("variable pairp equal epair")
         self.lmp.commands_string("variable numat equal atoms")
-        self.lmp.commands_string("run 0")
+        self.lmp.commands_string("run 0") #by running at timestep 0 it updates
         self.lmp.commands_string("print \"${etot} ${pairp} ${ptot} ${numat} \" append Summary.dat screen no")
         self.model.set_mode_run()
 

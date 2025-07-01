@@ -12,9 +12,10 @@ def add_atom(atoms,symbols,tol = 0.5):
         rnd_pos_scale = vnp.random.rand(1,3)
         rnd_pos = vnp.matmul(atoms.get_cell(),rnd_pos_scale.T)
         rnd_pos = rnd_pos.T[0]
+        #new atom being created and added to a list of already existing atoms
         new_atom = Atom('Ne',rnd_pos)
         tst_atoms = atoms.copy()
-        tst_atoms.append(new_atom)
+        tst_atoms.append(new_atom) #add a new atom to copy
         tst_atoms.wrap()
         rc = 5.
         
@@ -28,6 +29,7 @@ def add_atom(atoms,symbols,tol = 0.5):
         for i,j in zip(nl[0],nl[1]):
             bond_types[i].append( (atomic_numbers[tst_atoms[i].symbol] , atomic_numbers[tst_atoms[j].symbol])  )
         return symbol, tst_atoms, at_dists, rnd_pos, bond_types
+   #positioning check for the atoms to make sure the periodic boundary conditions are met
     symbol, tst_atoms , at_dists , rnd_pos, bond_types = readd()
     bondtyplst = list(bond_types.keys())
     syms = [tst_atom.symbol for tst_atom in tst_atoms]
@@ -47,9 +49,36 @@ def add_atom(atoms,symbols,tol = 0.5):
     atoms.append(Atom(symbol,rnd_pos))
     return atoms
 
-def remove_atom(atoms,symbols,tol = 0.5):
+def remove_atom(atoms,symbols,tol = 0.5): #removes one random atom
     blmin = closest_distances_generator(atom_numbers=[atomic_numbers[symbol] for symbol in symbols] + [atomic_numbers['Ne']], ratio_of_covalent_radii=0.5)
-    return atoms
+    remove_index = vnp.random.choice(len(atoms))
+    remove = atoms[remove_index]
+
+    tst_atoms = atoms.copy()
+    tst_atoms.pop(remove_index) #remove the randomly selected atom from copy
+
+    tst_atoms.wrap() 
+
+    atinds = [atom.index for atom in tst_atoms]
+    at_dists = {i: [] for i in atinds}
+    nl = primitive_neighbor_list('ijdD', pbc=tst_atoms.pbc, positions=tst_atoms.positions,
+                                 cell = atoms.get_cell(), cutoff=5.0)
+    bond_types = {i: [] for i in atinds}
+    for i,j in zip(nl[0], nl[-1]):
+        at_dists[i].append(j)
+    for i,j in zip(nl[0],nl[l]):
+        bond_types[i].append((atomic_numbers[tst_atoms[i].symbol],
+                              atomic_numbers[tst_atoms[j].symbol]))
+    
+    for i, atom in enumerate(tst_atoms):
+        tst_dists = at_dists[i]
+        tst_bonds = bond_types[i]
+        conds = all([vnp.linalg.norm(tst_atoms[i].position - test_atoms[j].position) >=
+                     blmin[(atomic_numbers[atom.symbol], tst_bonds[k][1])] - tol for k,j in enumerate(tst_dists)])  
+        if not conds:
+                tst_atoms.append(remove)
+                return atoms
+    return tst_atoms
 
 
 def change_cell(): #change cell size through scale variable.
