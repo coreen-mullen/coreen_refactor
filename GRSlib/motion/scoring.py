@@ -68,9 +68,16 @@ class Scoring:
         self._lmp.command("read_data %s" % self.data)
         #TODO make the possibility to import any reference potential to be used with the mliap one
 #        self._lmp.command("pair_style mliap model mliappy LATER descriptor ace coupling_coefficients.yace")
-
-        self._lmp.command("pair_style hybrid/overlay soft %2.3f mliap model mliappy LATER descriptor ace coupling_coefficients.yace" % self.config.sections['MOTION'].soft_strength)
-        self._lmp.command("pair_coeff * * soft %f" % self.config.sections['MOTION'].soft_strength)
+        try:
+            soft_strength = self.config.sections['MOTION'].soft_strength
+        except:
+            soft_strength = 1.0
+        #self._lmp.command("pair_style hybrid/overlay soft %2.3f mliap model mliappy LATER descriptor ace coupling_coefficients.yace" % self.config.sections['MOTION'].soft_strength)
+        self._lmp.command("pair_style hybrid/overlay soft %2.3f mliap model mliappy LATER descriptor ace coupling_coefficients.yace" % soft_strength)
+        #self._lmp.command("pair_coeff * * soft %f" % self.config.sections['MOTION'].soft_strength)
+        self._lmp.command("pair_coeff * * soft %f" % soft_strength)
+        elements = self.config.sections['BASIS'].elements
+        print(elements)
         self._lmp.command("pair_coeff mliap * * %s" % (" ".join(str(x) for x in self.config.sections['BASIS'].elements)))
         self._lmp.command('neighbor  2.3 bin')
         self._lmp.command("neigh_modify one 10000")
