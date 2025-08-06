@@ -11,6 +11,7 @@ from fitsnap3lib.lib.sym_ACE.clebsch_couple import *
 
 class Basis(Section):
 
+<<<<<<< HEAD
     def __init__(self, name, config, pt, infile, args):
         super().__init__(name, config, pt, infile, args)
         
@@ -75,6 +76,54 @@ class Basis(Section):
                 if len(self.lmin) == 1:
                     self.lmin = self.lmin * len(self.ranks)
                 ranked_chem_nus = [descriptor_labels_YSG(int(rnk), int(self.nmax[ind]), int(self.lmax[ind]), int(self.mumax),lmin = int(self.lmin[ind]) ) for ind,rnk in enumerate(self.ranks)]
+                for ind,rank in enumerate(self.ranks):
+                    rank = int(rank)
+                    PA_lammps, not_compat = pa_labels_raw(rank,int(self.nmax[ind]),int(self.lmax[ind]), int(self.mumax),lmin = int(self.lmin[ind]) )
+                    ranked_chem_nus.append(PA_lammps)
+                    if len(not_compat) > 0:
+                        self.pt.single_print('Functions incompatible with lammps for rank %d : '% rank, not_compat)
+            highranks = [int(r) for r in self.ranks if int(r) >= 5]
+            warnflag = any([ self.lmax_dct[rank] >= 5 and self.lmin[ind] > 1 for ind,rank in enumerate(highranks)])
+            if warnflag:
+                self.pt.single_print('WARNING: lmax and lmin for your current max rank will generate descriptors that cannot be entered into LAMMPS_PACE - try a lower lmax for ranks >= 4' % warnflag[0])
+            nus_unsort = [item for sublist in ranked_chem_nus for item in sublist]
+            nus = nus_unsort.copy()
+            mu0s = []
+            mus =[]
+            ns = []
+            ls = []
+            for nu in nus_unsort:
+                mu0ii,muii,nii,lii = get_mu_n_l(nu)
+                mu0s.append(mu0ii)
+                mus.append(tuple(muii))
+                ns.append(tuple(nii))
+                ls.append(tuple(lii))
+            nus.sort(key = lambda x : mus[nus_unsort.index(x)],reverse = False)
+            nus.sort(key = lambda x : ns[nus_unsort.index(x)],reverse = False)
+            nus.sort(key = lambda x : ls[nus_unsort.index(x)],reverse = False)
+            nus.sort(key = lambda x : mu0s[nus_unsort.index(x)],reverse = False)
+            nus.sort(key = lambda x : len(x),reverse = False)
+            nus.sort(key = lambda x : mu0s[nus_unsort.index(x)],reverse = False)
+            byattyp = srt_by_attyp(nus)
+            #config.nus = [item for sublist in list(byattyp.values()) for item in sublist]
+            for atype in range(self.numtypes):
+                nus = byattyp[str(atype)]
+                for nu in nus:
+                    i += 1
+                    mu0,mu,n,l,L = get_mu_n_l(nu,return_L=True)
+                    if L != None:
+                        flat_nu = [mu0] + mu + n + l + list(L)
+                    else:
+                        flat_nu = [mu0] + mu + n + l
+                    self.blist.append([i] + flat_nu)
+                    self.nus.append(nu)
+                    self.blank2J.append([prefac])
+            self.ncoeff = int(len(self.blist)/self.numtypes)
+            if not self.bzeroflag:
+                self.blank2J = np.reshape(self.blank2J, (self.numtypes, int(len(self.blist)/self.numtypes)))
+                onehot_atoms = np.ones((self.numtypes, 1))
+                self.blank2J = np.concatenate((onehot_atoms, self.blank2J), axis=1)
+                self.blank2J = np.reshape(self.blank2J, (len(self.blist) + self.numtypes))
             else:
                 ranked_chem_nus = [descriptor_labels_YSG(int(rnk), int(self.nmax[ind]), int(self.lmax[ind]), int(self.mumax),lmin = int(self.lmin) ) for ind,rnk in enumerate(self.ranks)]
         elif self.manuallabs == 'None' and self.b_basis == 'pa_tabulated':

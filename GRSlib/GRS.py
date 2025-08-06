@@ -6,6 +6,7 @@ from GRSlib.motion.motion import Gradient, Genetic
 
 import random
 import numpy as np
+import copy
 
 class GRS:
     """ 
@@ -41,12 +42,6 @@ class GRS:
             if (self.pt.lammps_version < 20220915):
                 raise Exception(f"Please upgrade LAMMPS to 2022-09-15 or later to use MLIAP based structure searching.")
 
-        #Convert initial target structure if available
-        if self.config.sections['TARGET'].target_fname is None:
-            print('Target structure not found or undefined')
-        else:
-            self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
-
     def __del__(self):
         """Override deletion statement to free shared arrays owned by this instance."""
         self.pt.free()
@@ -80,14 +75,19 @@ class GRS:
         between file types (xyz=lammps-data, ase.Atoms, etc)
         """
         #Pass data to, and do something with the functs of scoring
+#        target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
+        if not self.target_desc:
+            print('Target structure descriptors not found, using starting target')
+            self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
+        
         self.current_desc = self.convert_to_desc(data)
-        if (np.shape(self.current_desc)==np.shape(self.target_desc)):
-            print("Called Scoring Function")
-        else:
-            raise RuntimeError(">>> Found unmatched for target and current descriptors")
 
-        self.score = Scoring(data, self.current_desc, self.target_desc, self.pt, self.config) 
-        score = self.score.get_score()
+        if (np.shape(self.current_desc[1])==np.shape(self.target_desc[1])):
+            print("Called Scoring Function")
+            self.score = Scoring(data, self.current_desc, self.target_desc, self.pt, self.config) 
+            score = self.score.get_score()
+        else:
+            raise RuntimeError(">>> Found unmatched BASIS for target and current descriptors")
             
         return score
 

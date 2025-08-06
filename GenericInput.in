@@ -7,7 +7,7 @@ ranks = 1 2 3
 lmax = 0 3 3
 lmin = 0 0 0
 nmax = 8 1 1
-bikflag = 0
+bikflag = 1
 dgradflag = 0
 
 [MOTION]
@@ -25,16 +25,21 @@ population_size = 20
 ngenerations = 10
 
 [SCORING]
-moments = mean stdev skew  kurt
-moments_coeff = 1 0.1 0.01 0.001 
-moment_bonus = 1 5 10 20
-moments_cross_coeff = 1 0.1 0.01 0.001 
-moment_cross_bonus = 1 5 10 20 
+moments = mean 
+#stdev skew  kurt
+moments_coeff = 1 
+#0.1 0.01 0.001 
+moment_bonus = 1 
+#5 10 20
+moments_cross_coeff = 1 
+#0.1 0.01 0.001 
+moment_cross_bonus = 1 
+#5 10 20 
 attractor_target = True
 exact_distribution = False # Read in a stock structure and match exactly
 
 [TARGET]
-target_fname = 'bcc.data'
+target_fname = 'TwoAtoms.data'
 start_fname = 'bcc.data'
 
 [CONSTRAINT]

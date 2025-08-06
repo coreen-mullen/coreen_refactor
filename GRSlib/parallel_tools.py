@@ -119,12 +119,12 @@ class ParallelTools():
     This class creates and contains arrays used for fitting, across multiple processors.
 
     Attributes:
-        check_fitsnap_exist (bool): Checks whether fitsnap dictionaries exist before creating a new 
+        check_grs_exist (bool): Checks whether dictionaries exist before creating a new 
             one, set to `False` to allow recreating a dictionary.
     """
 
     def __init__(self, comm=None):
-        self.check_fitsnap_exist = True # set to False if want to allow re-creating dictionary
+        self.check_grs_exist = True # set to False if want to allow re-creating dictionary
         if comm is None:
             self.stubs = 1
         else:
@@ -166,7 +166,7 @@ class ParallelTools():
         self._seed = 0.0
         self._set_seed()
         self.shared_arrays = {}
-        self.fitsnap_dict = {}
+        self.grs_dict = {}
         self.logger = None
         self.pytest = False
         self._fp = None
@@ -563,7 +563,7 @@ class DistributedList:
     """
     This class is used for distributed memory Python lists. The class to wraps Python's `list` to ensure size stays the 
     same allowing collection at end. This class is normally used like, for example:
-    ``pt.add_2_fitsnap("Groups", DistributedList(nconfigs))``
+    ``pt.add_2_grs("Groups", DistributedList(nconfigs))``
 
     Args:
         proc_length (int): Number of elements for the list on current process.

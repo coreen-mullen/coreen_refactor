@@ -1,6 +1,7 @@
 import ctypes
 from GRSlib.converters.convert import Convert
 import numpy as np
+import copy
 
 
 class Base(Convert):
@@ -17,7 +18,7 @@ class Base(Convert):
         Calculate descriptors on a single configuration without touching the shared arrays.
 
         Args:
-            data: dictionary of structural and fitting info for a configuration in fitsnap
+            data: dictionary of structural and fitting info for a configuration in grs
                   data dictionary format.
             i: integer index which is optional, mainly for debugging purposes.
         
@@ -74,32 +75,32 @@ class Base(Convert):
     def _run_lammps(self):
         self._lmp.command("run 0")
 
-    def _extract_atom_ids(self, num_atoms):
-        # helper function to account for change in LAMMPS numpy_wrapper method name
-        try:
-            ids = self._lmp.numpy.extract_atom(name="id", nelem=num_atoms).ravel()
-        except:
-            ids = self._lmp.numpy.extract_atom_iarray(name="id", nelem=num_atoms).ravel()
-        return ids
+def _extract_atom_ids(self, num_atoms):
+    # helper function to account for change in LAMMPS numpy_wrapper method name
+    try:
+        ids = self._lmp.numpy.extract_atom(name="id", nelem=num_atoms).ravel()
+    except:
+        ids = self._lmp.numpy.extract_atom_iarray(name="id", nelem=num_atoms).ravel()
+    return ids
 
-    def _extract_atom_positions(self, num_atoms):
-        # helper function to account for change in LAMMPS numpy_wrapper method name
-        try:
-            pos = self._lmp.numpy.extract_atom(name="x", nelem=num_atoms, dim=3)
-        except:
-            pos = self._lmp.numpy.extract_atom_darray(name="x", nelem=num_atoms, dim=3)
-        return pos
+def _extract_atom_positions(self, num_atoms):
+    # helper function to account for change in LAMMPS numpy_wrapper method name
+    try:
+        pos = self._lmp.numpy.extract_atom(name="x", nelem=num_atoms, dim=3)
+    except:
+        pos = self._lmp.numpy.extract_atom_darray(name="x", nelem=num_atoms, dim=3)
+    return pos
 
-    def _extract_atom_types(self, num_atoms):
-        # helper function to account for change in LAMMPS numpy_wrapper method name
-        try:
-            types = self._lmp.numpy.extract_atom(name="type", nelem=num_atoms).ravel()
-        except:
-            types = self._lmp.numpy.extract_atom_iarray(name="type", nelem=num_atoms).ravel()
-        return types
+def _extract_atom_types(self, num_atoms):
+    # helper function to account for change in LAMMPS numpy_wrapper method name
+    try:
+        types = self._lmp.numpy.extract_atom(name="type", nelem=num_atoms).ravel()
+    except:
+        types = self._lmp.numpy.extract_atom_iarray(name="type", nelem=num_atoms).ravel()
+    return types
 
 
-def _extract_compute_np(lmp, name, compute_style, result_type, array_shape=None):
+def _extract_compute_np(lmp, name, compute_style, result_type, array_shape):
     """
     Convert a lammps compute to a numpy array.
     Assumes the compute stores floating point numbers.
@@ -124,9 +125,12 @@ def _extract_compute_np(lmp, name, compute_style, result_type, array_shape=None)
             ptr = ptr.contents
         total_size = np.prod(array_shape)
         buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * total_size))
-        array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
+        array_np = copy.deepcopy(np.frombuffer(buffer_ptr.contents, dtype=float))
+#        array_np = copy.deepcopy(buffer_ptr.contents)
         array_np.shape = array_shape
-    return array_np
+        reshaped_array_np = np.delete(array_np, np.s_[-1:], axis=1)
+        #LAMMPS is returning an extra descriptor at the end of the list, deleting by reshaping
+    return reshaped_array_np
 
 def _extract_commands(string):
     return [x for x in string.splitlines() if x.strip() != '']

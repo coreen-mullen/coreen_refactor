@@ -30,7 +30,7 @@ def initialize_GRS_run():
         pt.single_print("mpi4py version: ", mpi4py.__version__)
 
     except NameError:
-        print("No mpi4py detected, using fitsnap stubs...")
+        print("No mpi4py detected, using grs stubs...")
 
     try:
         import numpy as np
