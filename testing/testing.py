@@ -27,6 +27,10 @@ file = grs.convert.ase_to_lammps(atoms)
 current_desc = grs.convert_to_desc(file)
 #-----------------------
 #grs.genetic_move.tournament_selection(data=None)
+grs.current_desc = current_desc
+grs.random_values = np.random.rand(*current_desc.shape)
+print('testing')
+grs.genetic_move('bcc.data')
 
 score = grs.get_score('bcc.data')
 print(score)

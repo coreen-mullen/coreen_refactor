@@ -114,9 +114,10 @@ class GRS:
         #4) Store socring information with best-of-generation and best-overall isolated
         #5) Loop until generation limit or scoring residual below threshold
         print("Called Genetic_Move")
-
-        if data == None:
-            data = self.propose_structure()
+        if self.current_desc is None:
+            self.current_desc = self.propose_structure()
+        #if data == None:
+            #data = self.propose_structure()
 
         self.current_desc = self.convert_to_desc(data) 
         self.genmove = Genetic(data, self.current_desc, self.target_desc, self.pt, self.config) 
