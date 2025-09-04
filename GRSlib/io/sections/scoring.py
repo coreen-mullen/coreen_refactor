@@ -1,5 +1,4 @@
 from GRSlib.io.sections.sections import Section
-
 #pt = ParallelTools()
 #output = Output()
 class Scoring(Section):
@@ -16,4 +15,5 @@ class Scoring(Section):
         self.attractor_target = self.get_value("SCORING", "attractor_target", True)
         self.exact_distribution = self.get_value("SCORING", "exact_distribution", False)
         self.delete()
+
 

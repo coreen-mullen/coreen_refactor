@@ -1,0 +1,55 @@
+[BASIS]
+descriptor = ACE
+numTypes = #num of element types 
+elements = #element abbr.
+rcutfac =  Radial cutoff distance for atomic neighborhood.
+ranks = ?
+lmax = ?
+lmin = ?
+nmax = ? n_totconfig? 
+bikflag =  ? boolean
+dgradflag = ? boolean 
+
+[MOTION]
+soft_strength =   #Repulsive potential
+ml_strength =     #Loss function potential
+nsteps = :p 
+temperature = :p
+min_type = "" #line/temp/box/fire
+randomize_comps =  # flag to use randomized compositions for elements in the dictionary: target_comps = {'Cr':1.0 }
+
+[GENETIC]
+mutation_rate = 
+mutation_types = {'perturb_one': 0.5, 'perturb_N' : 0.5, 'flip_one': 0.0, 'flip_N': 0.0, 'create_one' : 0.0, 'delete_one' : 0.0}
+population_size =  
+ngenerations = 
+
+[SCORING]
+moments =  
+#stdev skew  kurt
+moments_coeff =  
+#0.1 0.01 0.001 
+moment_bonus =  
+#5 10 20
+moments_cross_coeff =  
+#0.1 0.01 0.001 
+moment_cross_bonus =  
+#5 10 20 
+attractor_target = 
+exact_distribution =  # Read in a stock structure and match exactly
+
+[TARGET]    
+target_fname = 'TwoAtoms.data'
+start_fname = 'bcc.data'
+
+[CONSTRAINT]
+masses = {}
+target_comps = {} #composition in dictionary form: e.g. { W:0.5, Be:0.5} 
+minatoms = 
+maxatoms = 
+template = 
+
+[OUTPUT]
+logfiles = 
+structures = 
+scores = 

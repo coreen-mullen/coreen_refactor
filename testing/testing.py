@@ -29,6 +29,9 @@ grs = GRS(settings, comm=comm)
 #grs.genetic_move.tournament_selection(data=None)
 
 score = grs.get_score('bcc.data')
+
+ensemb = grs.ensemble_score('bcc.data')
+print(ensemb)
 print(score)
 #print("!")
-exit()
+exit() 

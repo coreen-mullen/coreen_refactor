@@ -11,7 +11,6 @@ from fitsnap3lib.lib.sym_ACE.clebsch_couple import *
 
 class Basis(Section):
 
-<<<<<<< HEAD
     def __init__(self, name, config, pt, infile, args):
         super().__init__(name, config, pt, infile, args)
         
@@ -78,7 +77,7 @@ class Basis(Section):
                 ranked_chem_nus = [descriptor_labels_YSG(int(rnk), int(self.nmax[ind]), int(self.lmax[ind]), int(self.mumax),lmin = int(self.lmin[ind]) ) for ind,rnk in enumerate(self.ranks)]
                 for ind,rank in enumerate(self.ranks):
                     rank = int(rank)
-                    PA_lammps, not_compat = pa_labels_raw(rank,int(self.nmax[ind]),int(self.lmax[ind]), int(self.mumax),lmin = int(self.lmin[ind]) )
+                    PA_lammps, not_compat = pa_labels_raw(rank,int(self.nmax[ind]),int(self.lmax[ind]), int(self.mumax),lmin = int(self.lmin[ind]) ) 
                     ranked_chem_nus.append(PA_lammps)
                     if len(not_compat) > 0:
                         self.pt.single_print('Functions incompatible with lammps for rank %d : '% rank, not_compat)
