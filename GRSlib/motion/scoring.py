@@ -1,6 +1,7 @@
 from GRSlib.Ver0_Files.opt_tools import internal_generate_cell
 from GRSlib.parallel_tools import ParallelTools
 from GRSlib.motion.lossfunc.moments import LossFunction
+from GRSlib.Ver0_Files.opt_tools import get_desc_count
 from GRSlib.converters.sections.lammps_base import Base, _extract_compute_np
 from examples.simple_test.GRS_protocol import GRSModel, GRSSampler
 import lammps, lammps.mliap
@@ -12,7 +13,20 @@ from opt_tools.py import *
 from GSQS_protocol import *
 #Scoring has to be a class within motion because we want a consistent reference for scores, ans this
 #refrence will be LAMMPS using a constructed potential energy surface from the representation loss function
-
+n_totconfig = 10
+data_path = 'bcc.data'
+cross_weight =1.000000
+self_weight: 1.000000
+randomize_comps= False # # flag to use randomized compositions for elements in the dictionary: target_comps = {'Cr':1.0 }
+mincellsize = 54
+maxcellsize=55
+target_comps = {'W:1.0'}
+min_typ_global='box' #box or min
+soft_strength=0.0
+elems=get_desc_count('coupling_coefficients.yace',return_elems=True)
+nelements= len(elems)
+n_descs= get_desc_count('coupling_coefficients.yace')
+rand_comp =1
 class Scoring:
 
     def __init__(self, data, current_desc, target_desc, pt, config):
@@ -102,7 +116,8 @@ class Scoring:
 # target_comps is in input
 #numelements = num types? 
 
-    def ensemble_score(self, n_totconfig, data_path,cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global,soft_strength, nelements,n_descs,mask,rand_comp): #generates the multiple structures -- needs internal generate cell , some of these should be defined in the input file like n_totconfig if they choose multiple and the crossweight and self weigths
+    def ensemble_score(self, n_totconfig, data_path,cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global,soft_strength, nelements,n_descs,mask,rand_comp): 
+        self.mask=mask#generates the multiple structures -- needs internal generate cell , some of these should be defined in the input file like n_totconfig if they choose multiple and the crossweight and self weigths
         i = 1
         while i <= n_totconfig: 
             print(i,"/",n_totconfig,"Using indicies :",mask)

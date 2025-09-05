@@ -8,7 +8,7 @@ lmax = ?
 lmin = ?
 nmax = ? n_totconfig? 
 bikflag =  ? boolean
-dgradflag = ? boolean 
+dgradflag = boolean descriptor gradient flag 
 
 [MOTION]
 soft_strength =   #Repulsive potential
