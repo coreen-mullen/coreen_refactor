@@ -101,10 +101,10 @@ class Config():
                 for key2, data2 in data1.items():
                     self._original_config[key1]["{}".format(key2)] = str(data2)
             # Default missing sections to empty dicts which will prompt default values.
-            names = ["ESHIFT", "EXTRAS", "GROUPS", "MEMORY"]
-            for name in names:
-                if name not in self._original_config:
-                    self._original_config[name] = {}
+#            names = ["NOTUSED"]
+#            for name in names:
+#                if name not in self._original_config:
+#                    self._original_config[name] = {}
 
         # Make sections based on input settings.
         self._set_sections(self._original_config)

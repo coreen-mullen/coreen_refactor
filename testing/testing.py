@@ -19,12 +19,12 @@ grs = GRS(settings, comm=comm)
 #print("attr of grs.convert:")
 #print(attributes)
 
-atoms = grs.convert.lammps_to_ase('bcc.data')
+#atoms = grs.convert.lammps_to_ase('bcc.data')
 #print(atoms)
-file = grs.convert.ase_to_lammps(atoms)
+#file = grs.convert.ase_to_lammps(atoms)
 #print(file)
 #grs.convert.run_lammps_single('bcc.data')
-current_desc = grs.convert_to_desc(file)
+#current_desc = grs.convert_to_desc(file)
 #-----------------------
 #grs.genetic_move.tournament_selection(data=None)
 grs.current_desc = current_desc
@@ -34,5 +34,5 @@ grs.genetic_move('bcc.data')
 
 score = grs.get_score('bcc.data')
 print(score)
-print("!")
+#print("!")
 exit()

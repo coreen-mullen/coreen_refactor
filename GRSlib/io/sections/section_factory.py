@@ -30,6 +30,6 @@ def search(section):
             instance = Section.__new__(cls)
 
     if instance is None:
-        raise IndexError("{} was not found in fitsnap sections".format(section))
+        raise IndexError("{} was not found in grs sections".format(section))
     else:
         return instance
