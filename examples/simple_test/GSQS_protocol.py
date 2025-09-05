@@ -50,7 +50,7 @@ n_descs=get_desc_count('coupling_coefficients.yace')
 elems=get_desc_count('coupling_coefficients.yace',return_elems=True)
 nelements = len(elems)
 
-data_path="./StructureDump"
+data_path="./StructureDump" #why do we need the lammps data files are they the targets?
 cross_weight=0.01 #closeness to target as a joint distribution min/max just flip this sign (pos being minimize).
 self_weight=1. #closeness to target within an atomic configuration. min/max just flip this sign (pos being minimize). 
 
@@ -291,7 +291,7 @@ while i <= n_totconfig:
     #sampler.run("minimize 1e-6 1e-6 10000 100000")
     sampler.run("minimize 1e-6 1e-6 1000 10000")
     sampler.run("write_data %s/sample.%i.dat " % (data_path,i) )
-    sampler.update_model()
+    sampler.update_model() #updates the model with a new structure
 
     i+=1
 

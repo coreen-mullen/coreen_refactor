@@ -1,12 +1,15 @@
+from GRSlib.Ver0_Files.opt_tools import internal_generate_cell
 from GRSlib.parallel_tools import ParallelTools
 from GRSlib.motion.lossfunc.moments import LossFunction
 from GRSlib.converters.sections.lammps_base import Base, _extract_compute_np
+from examples.simple_test.GRS_protocol import GRSModel, GRSSampler
 import lammps, lammps.mliap
 from lammps.mliap.loader import *
 from jax import grad, jit
 from functools import partial
-import numpy as np
-
+import numpy as vnp
+from opt_tools.py import *
+from GSQS_protocol import *
 #Scoring has to be a class within motion because we want a consistent reference for scores, ans this
 #refrence will be LAMMPS using a constructed potential energy surface from the representation loss function
 
@@ -93,3 +96,32 @@ class Scoring:
         add_lmp_lines = [x for x in string.splitlines() if x.strip() != '']
         for line in add_lmp_lines:
                 self._lmp.command(line)
+#internal generate cell is only used in scoring.py but defined in opt_tools + gsqsmodel only in scoring.py currently
+#class ensemble_score(): #will take in the target, and compare it to multiple generated structures -- look at fitsnap sections
+# min and maxatoms the same as maxcellsize?
+# target_comps is in input
+#numelements = num types? 
+
+    def ensemble_score(self, n_totconfig, data_path,cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global,soft_strength, nelements,n_descs,mask,rand_comp): #generates the multiple structures -- needs internal generate cell , some of these should be defined in the input file like n_totconfig if they choose multiple and the crossweight and self weigths
+        i = 1
+        while i <= n_totconfig: 
+            print(i,"/",n_totconfig,"Using indicies :",mask)
+        if not randomize_comps:
+            g = internal_generate_cell(i,desired_size=vnp.random.choice(range(mincellsize,maxcellsize)),template=None,desired_comps=target_comps,use_template=None,min_typ=min_typ_global,soft_strength=soft_strength)
+        else:
+            target_comps_rnd = rand_comp(target_comps) #randomize_comp in input? and target_comps in input?
+            g = internal_generate_cell(i,desired_size=vnp.random.choice(range(mincellsize,maxcellsize)),template=None,desired_comps=target_comps_rnd,use_template=None,min_typ=min_typ_global,soft_strength=soft_strength)
+        em=GRSModel(nelements,n_descs,mask=mask) 
+        sampler = GRSSampler(em, g)
+        em.K_cross = cross_weight
+        em.K_self = self_weight
+        #min type
+        sampler.run("minimize 1e-6 1e-6 1000 10000")
+        
+        sampler.run("write_data %s/sample.%i.dat " % (data_path, i))
+        
+        sampler.update_model() #updating the model is how all of the generated structures get combined into one.
+    
+
+# total number of configurations
+#n_totconfig = int(sys.argv[2])

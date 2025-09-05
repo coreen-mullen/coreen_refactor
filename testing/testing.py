@@ -33,6 +33,9 @@ print('testing')
 grs.genetic_move('bcc.data')
 
 score = grs.get_score('bcc.data')
+
+ensemb = grs.ensemble_score('bcc.data')
+print(ensemb)
 print(score)
 #print("!")
 exit()
