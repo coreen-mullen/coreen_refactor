@@ -51,9 +51,10 @@ class Ace(Convert):
             elems = elemstr4.split()
             nelements = len(elems)
             desclines = [line for line in lines if 'mu0' in line]
-        
+
         #ncols_pace = int(len(desclines)/nelements)
         ncols_pace = int(len(desclines)/nelements) + nelements 
+
         nrows_pace = num_atoms
         lmp_pace = _extract_compute_np(self._lmp, "pace", 0, 2, (nrows_pace, ncols_pace))
 
