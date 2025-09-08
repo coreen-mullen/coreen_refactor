@@ -23,7 +23,7 @@ class Ace(Convert):
 
         compute_name='pace'
         numtypes = len(self.config.sections['BASIS'].elements)
-        base_pace = "compute %s all pace coupling_coefficients.yace %s %s" % (compute_name,self.config.sections['BASIS'].bikflag,self.config.sections['BASIS'].dgradflag)
+        base_pace = "compute %s all pace coupling_coefficients.yace %d %d" % (compute_name,self.config.sections['BASIS'].bikflag,self.config.sections['BASIS'].dgradflag)
         self._lmp.command(base_pace)
         return compute_name
 

@@ -10,8 +10,6 @@ from fitsnap3lib.lib.sym_ACE.wigner_couple import *
 from fitsnap3lib.lib.sym_ACE.clebsch_couple import *
 
 class Basis(Section):
-
-<<<<<<< HEAD
     def __init__(self, name, config, pt, infile, args):
         super().__init__(name, config, pt, infile, args)
         
