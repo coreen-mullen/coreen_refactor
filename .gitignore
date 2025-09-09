@@ -18,4 +18,5 @@ docs/build/
 # ignore MacOS generated files
 *.DS_Store
 
-
+#ignore openmpi folder
+testing/openmpi-4.1.1/

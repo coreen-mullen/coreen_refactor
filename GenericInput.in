@@ -1,6 +1,6 @@
 [BASIS]
 descriptor = ACE
-numTypes = 1
+numTypes = 1 
 elements = W
 rcutfac = 5.5
 ranks = 1 2 3
