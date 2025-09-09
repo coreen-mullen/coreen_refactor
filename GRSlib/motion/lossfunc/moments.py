@@ -15,25 +15,34 @@ class LossFunction:
         self.loss_ff_grad = grad(self.construct_loss)
         self.n_descriptors = np.shape(self.target_desc)[1]
         self.n_elements = self.config.sections['BASIS'].numtypes
+        self.grad_first_moment_atomic = grad(self.first_moment_peratom)
         self.grad_first_moment = grad(self.first_moment)
         self.grad_second_moment = grad(self.second_moment)
         self.grad_third_moment = grad(self.third_moment)
         self.grad_fourth_moment = grad(self.fourth_moment)
         self.grad_loss = grad(self.construct_loss)
+        self.mask = list(range(self.n_descriptors))
         self.mode="update"
 
     def __call__(self, elems, current_desc, beta, energy): 
+        #The arguments that this function brings in are super improtant and are expected by LAMMPS MLIAP package.
+        #LAMMPS will populate the descriptors as a per-atom array into current_desc.
+        #Per-atom forces are expected for beta
+        #Per-atom energy is expected for energy, need to do some testing if per-atom values can be reported back.
         self.n_atoms = np.shape(current_desc)[0]
         if self.mode=="score":     
             score = self.construct_loss(current_desc, self.target_desc)
             energy[:] = 0
             energy[0] = score
-            print("     Mean score calculated from loss function constructor: ",score)
-#            grad_score = self.grad_loss(self.current_desc, self.target_desc)
-#            beta[:,:] = 0
-#            beta = grad_score
+            #print("     Mean score calculated from loss function constructor: ",score)
+            forces = self.grad_loss(current_desc, self.target_desc)
+            #forces = self.grad_first_moment_atomic(self.current_desc, self.target_desc)
+            beta[:,:] = 0
+            beta[:,self.mask] = forces
         elif self.mode=="update":
             self.update()
+            beta = self.grad_loss(current_desc, self.target_desc)
+
 
     def set_mode_update(self):
         self.mode="update"
@@ -42,7 +51,7 @@ class LossFunction:
         self.mode="score"
 
     def update(self):
-        print("Updating the loss function given new information")
+        #print("Updating the loss function given new information")
         if self.n_elements > 1:
             self.current_desc = self.current_desc.flatten()
             self.target_desc = self.target_desc.flatten()
@@ -142,4 +151,8 @@ class LossFunction:
         tst_residual_final = tst_residual*float(self.config.sections['SCORING'].moments_coeff[3]) + bonus #MAE + bonus
         return tst_residual_final
 
-
+    @partial(jit, static_argnums=(0,))
+    def first_moment_peratom(self, current_desc, target_desc):
+        target_avg = jnp.average(target_desc, axis=0)
+        tst_residual = jnp.nan_to_num(jnp.abs(current_desc-target_avg))
+        return tst_residual

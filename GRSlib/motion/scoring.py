@@ -39,16 +39,16 @@ class Scoring:
         if self.n_elements > 1:
             current_desc = current_desc.flatten()
             target_desc = target_desc.flatten()
-        self._lmp = self.pt.initialize_lammps('log.lammps',0)
-        lammps.mliap.activate_mliappy(self._lmp)
+        self.lmp = self.pt.initialize_lammps('log.lammps',0)
+        lammps.mliap.activate_mliappy(self.lmp)
         self.loss_ff = LossFunction(self.config, self.current_desc, self.target_desc)
     
     def construct_lmp(self):
         #Generates the major components of a lammps script needed for a scoring call
-#        me = self._lmp.extract_setting("world_rank")
-#        nprocs = self._lmp.extract_setting("world_size")
+#        me = self.lmp.extract_setting("world_rank")
+#        nprocs = self.lmp.extract_setting("world_size")
 #        cmds = ["-screen", "none", "-log", "none"]
-#        self._lmp = lammps(cmdargs = cmds)
+#        self.lmp = lammps(cmdargs = cmds)
         self.lmp = self.pt.initialize_lammps('log.lammps',0)
         lammps.mliap.activate_mliappy(self.lmp)
         construct_string=\
@@ -76,17 +76,17 @@ class Scoring:
         self.lmp.command("run 0")
         num_atoms = self.lmp.extract_global("natoms")
         atom_energy = _extract_compute_np(self.lmp, "peatom", 0, 2, (num_atoms, 1))
-        del self.lmp
+#        del self.lmp
         return atom_energy
 
     def get_norm_forces(self):
         #Return as array per-atom forces 
         self.construct_lmp()
-        self._lmp.command("compute fatom all property/atom fx fy fz")
-        self._lmp.command("run 0")
-        num_atoms = self._lmp.extract_global("natoms")
+        self.lmp.command("compute fatom all property/atom fx fy fz")
+        self.lmp.command("run 0")
+        num_atoms = self.lmp.extract_global("natoms")
         atom_forces = _extract_compute_np(self.lmp, "fatom", 0, 2, (num_atoms, 3))        
-        del self.lmp
+#        del self.lmp
         return atom_forces
 
     def get_score(self):
@@ -94,22 +94,23 @@ class Scoring:
         self.construct_lmp()
         self.lmp.command("run 0")
         score = self.lmp.get_thermo("pe") # potential energy
-#        del self._lmp
+#        del self.lmp
         return score
 
     def add_cmds_before_score(self,string):
         self.construct_lmp()
+        before_score = self.get_score()
         self._extract_commands(string)
-        self._lmp.commands_string("run 0")
-        after_score = self._lmp.get_thermo("pe") # potential energy
-        del self._lmp
+        self.lmp.commands_string("run 0")
+        after_score = self.lmp.get_thermo("pe") # potential energy
+#        del self._lmp
         return before_score, after_score
 
     def _extract_commands(self,string):
         #Can be given a block of text where it will split them into individual commands
         add_lmp_lines = [x for x in string.splitlines() if x.strip() != '']
         for line in add_lmp_lines:
-                self._lmp.command(line)
+            self.lmp.command(line)
 #internal generate cell is only used in scoring.py but defined in opt_tools + gsqsmodel only in scoring.py currently
 #class ensemble_score(): #will take in the target, and compare it to multiple generated structures -- look at fitsnap sections
 # min and maxatoms the same as maxcellsize?
@@ -140,3 +141,4 @@ class Scoring:
 
 # total number of configurations
 #n_totconfig = int(sys.argv[2])
+               # self.lmp.command(line)

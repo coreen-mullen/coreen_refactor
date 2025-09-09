@@ -25,10 +25,10 @@ settings = \
 "SCORING":
     {
     "moments": "mean" ,
-    "moments_coeff": 1.0 ,
-    "moment_bonus": 0 ,
-    "moments_cross_coeff": 1 ,
-    "moment_cross_bonus": 0 ,
+    "moments_coeff": "1.0",
+    "moment_bonus": "0" ,
+    "moments_cross_coeff": "0",
+    "moment_cross_bonus": "0",
     "attractor_target": "True",
     "exact_distribution": "False"
     },
@@ -36,6 +36,15 @@ settings = \
     {
     "target_fname": "bcc.data",
     "start_fname": "notbcc.data"
+    },
+"MOTION":
+    {
+    "soft_strength": 1.0,
+    "ml_strength": 1.0,
+    "nsteps": 1000,
+    "temperature": 0.0,
+    "min_type": "line", 
+    "randomize_comps": False 
     }
 }
 
@@ -54,5 +63,8 @@ grs = GRS(settings,comm=comm)
 
 score = grs.get_score(settings["TARGET"]["start_fname"])
 print("     Mean score calculated through LAMMPS:",score)
-#print("!")
+#print("Done checking socring!")
+
+grs.gradient_move(settings["TARGET"]["start_fname"])
+
 exit()

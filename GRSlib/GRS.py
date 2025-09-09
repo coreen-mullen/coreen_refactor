@@ -75,13 +75,12 @@ class GRS:
         between file types (xyz=lammps-data, ase.Atoms, etc)
         """
         #Pass data to, and do something with the functs of scoring
-#        target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
-        if not self.target_desc:
-            print('Target structure descriptors not found, using starting target')
-            self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
+        self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
+#        if self.target_desc == None:
+#            print('Target structure descriptors not found, using starting target')
+#            self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
         
         self.current_desc = self.convert_to_desc(data)
-
         if (np.shape(self.current_desc[1])==np.shape(self.target_desc[1])):
             print("Called Scoring Function")
             self.score = Scoring(data, self.current_desc, self.target_desc, self.pt, self.config) 
@@ -147,16 +146,16 @@ class GRS:
         self.gradmove = Gradient(data, self.current_desc, self.target_desc, self.pt, self.config) 
         if self.config.sections['MOTION'].min_type == 'fire':
             before_score, after_score = self.gradmove.fire_min()
-            print(before_score, after_score)
+            print("Score Before/After Gradient Move:",before_score, after_score)
         elif self.config.sections['MOTION'].min_type == 'line':
             before_score, after_score = self.gradmove.line_min()
-            print(before_score, after_score)
+            print("Score Before/After Gradient Move:",before_score, after_score)
         elif self.config.sections['MOTION'].min_type == 'box':
             before_score, after_score = self.gradmove.box_min()
-            print(before_score, after_score)
+            print("Score Before/After Gradient Move:",before_score, after_score)
         elif self.config.sections['MOTION'].min_type == 'temp':
             before_score, after_score = self.gradmove.run_then_min()
-            print(before_score, after_score)
+            print("Score Before/After Gradient Move:",before_score, after_score)
 
     def baseline_training(self):
         """
