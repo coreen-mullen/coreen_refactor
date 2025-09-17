@@ -7,19 +7,15 @@ from lammps.mliap.loader import *
 import copy
 
 class LossFunction:
-    def __init__(self, config, current_desc, target_desc):
+    def __init__(self, config, current_desc, target_desc, prior_desc):
         self.n_params = 1
         self.config = config
         self.current_desc = current_desc.copy()
         self.target_desc = target_desc.copy() #copy.deepcopy(target_desc)
+        self.prior_desc = prior_desc.copy() #copy.deepcopy(target_desc)
         self.loss_ff_grad = grad(self.construct_loss)
         self.n_descriptors = np.shape(self.target_desc)[1]
         self.n_elements = self.config.sections['BASIS'].numtypes
-        self.grad_first_moment_atomic = grad(self.first_moment_peratom)
-        self.grad_first_moment = grad(self.first_moment)
-        self.grad_second_moment = grad(self.second_moment)
-        self.grad_third_moment = grad(self.third_moment)
-        self.grad_fourth_moment = grad(self.fourth_moment)
         self.grad_loss = grad(self.construct_loss)
         self.mask = list(range(self.n_descriptors))
         self.mode="update"
@@ -33,12 +29,17 @@ class LossFunction:
         if self.mode=="score":     
             score = self.construct_loss(current_desc, self.target_desc)
             energy[:] = 0
-            energy[0] = score
-            #print("     Mean score calculated from loss function constructor: ",score)
-            forces = self.grad_loss(current_desc, self.target_desc)
-            #forces = self.grad_first_moment_atomic(self.current_desc, self.target_desc)
+            energy[0] = float(self.config.sections["SCORING"].strength_target)*score #Scaled score (energy) between current and target
+            forces = self.grad_loss(current_desc, self.target_desc) #Forces between current and target
             beta[:,:] = 0
-            beta[:,self.mask] = forces
+            beta[:,self.mask] = float(self.config.sections["SCORING"].strength_target)*forces #Scaled forces between current and target
+
+            score = self.construct_loss(current_desc, self.prior_desc)
+#            energy[0] += float(self.config.sections["SCORING"].strength_prior)*score #Scaled score (energy) between current and prior
+#            print("     Target, Prior Scores: ", energy[0], score)
+            forces = self.grad_loss(current_desc, self.prior_desc) #Forces between current and prior structures
+            beta[:,self.mask] += float(self.config.sections["SCORING"].strength_prior)*forces #Scaled forces between current and prior
+
         elif self.mode=="update":
             self.update()
             beta = self.grad_loss(current_desc, self.target_desc)
@@ -55,6 +56,7 @@ class LossFunction:
         if self.n_elements > 1:
             self.current_desc = self.current_desc.flatten()
             self.target_desc = self.target_desc.flatten()
+            self.prior_desc = self.prior_desc.flatten()
         self.mode = "score"
 
     @partial(jit, static_argnums=(0,))
@@ -64,25 +66,21 @@ class LossFunction:
         set_of_moments = []
 
         if (any(x == 'mean' for x in self.config.sections['SCORING'].moments)):
-            print("Adding mean to loss function force field")
             first_mom = self.first_moment(current_desc, target_desc)
         else:
             first_mom = None
             
         if (any(x == 'stdev' for x in self.config.sections['SCORING'].moments)):
-            print("Adding standard deviation to loss function force field")
             second_mom = self.second_moment(current_desc, target_desc)
         else:
             second_mom = None
 
         if (any(x == 'skew' for x in self.config.sections['SCORING'].moments)):
-            print("Adding skewness to loss function force field")
             third_mom = self.third_moment(current_desc, target_desc)
         else:
             third_mom = None
 
         if (any(x == 'kurt' for x in self.config.sections['SCORING'].moments)):
-            print("Adding kurtosis to loss function force field")
             fourth_mom = self.fourth_moment(current_desc, target_desc)
         else:
             fourth_mom = None

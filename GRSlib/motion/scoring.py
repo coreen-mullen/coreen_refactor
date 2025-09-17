@@ -29,11 +29,12 @@ n_descs= get_desc_count('coupling_coefficients.yace')
 rand_comp =1
 class Scoring:
 
-    def __init__(self, data, current_desc, target_desc, pt, config):
+    def __init__(self, data, current_desc, target_desc, prior_desc, pt, config):
         self.pt = pt #ParallelTools()
         self.config = config #Config()
         self.current_desc = []
         self.target_desc = target_desc
+        self.prior_desc = prior_desc
         self.data = data
         self.n_elements = self.config.sections['BASIS'].numtypes
         if self.n_elements > 1:
@@ -41,7 +42,7 @@ class Scoring:
             target_desc = target_desc.flatten()
         self.lmp = self.pt.initialize_lammps('log.lammps',0)
         lammps.mliap.activate_mliappy(self.lmp)
-        self.loss_ff = LossFunction(self.config, self.current_desc, self.target_desc)
+        self.loss_ff = LossFunction(self.config, self.current_desc, self.target_desc, self.prior_desc)
     
     def construct_lmp(self):
         #Generates the major components of a lammps script needed for a scoring call
@@ -56,14 +57,15 @@ class Scoring:
         units metal
         atom_style atomic
         read_data {}
-        pair_style mliap model mliappy LATER descriptor ace coupling_coefficients.yace
-        pair_coeff * * {}
+        pair_style hybrid/overlay soft 1.0 mliap model mliappy LATER descriptor ace coupling_coefficients.yace
+        pair_coeff * * soft {}
+        pair_coeff * * mliap {}
         neighbor 2.3 bin
         neigh_modify one 10000
         thermo 10
         thermo_style custom step etotal temp press
         """
-        init_lmp=construct_string.format(self.data, (" ".join(str(x) for x in self.config.sections['BASIS'].elements)))
+        init_lmp=construct_string.format(self.data, self.config.sections["MOTION"].soft_strength, (" ".join(str(x) for x in self.config.sections['BASIS'].elements)))
         #TODO make the possibility to import any reference potential to be used with the mliap one
         self.lmp.commands_string(init_lmp)
         lammps.mliap.load_model(self.loss_ff)
