@@ -43,20 +43,27 @@ write('simple_bcc.data',atoms,format='lammps-data')
 #-----------------------
 #grs.genetic_move.tournament_selection(data=None)
 
-grs.current_desc = current_desc
-grs.random_values = np.random.rand(*current_desc.shape)
+#grs.current_desc = current_desc
+#grs.random_values = np.random.rand(*current_desc.shape)
 print('testing')
-grs.genetic_move('bcc.data')
+#grs.genetic_move('bcc.data')
 
 score = grs.get_score('bcc.data')
 
-ensemb = grs.ensemble_score('bcc.data')
-print(ensemb)
-print(score)
+#ensemb = grs.get_ensemble('bcc.data')
+#print(ensemb)
+
+print("!!!")
+ensemble_scores = grs.get_ensemble('bcc.data')
+print("Ensemble Scores:", ensemble_scores)
+
+
+
+#print(score)
 #print("!")
 
-print('current desc',current_desc)
+#print('current desc',current_desc)
 #score = grs.get_score('bcc.data')
 #print(score)
-print("!")
+#print("!")
 exit()

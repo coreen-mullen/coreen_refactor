@@ -11,7 +11,8 @@ class LossFunction:
         self.n_params = 1
         self.config = config
         self.current_desc = current_desc.copy()
-        self.target_desc = target_desc.copy() #copy.deepcopy(target_desc)
+        self.target_desc = jnp.array(target_desc)
+        #self.target_desc = target_desc.copy() #copy.deepcopy(target_desc)
         self.prior_desc = prior_desc.copy() #copy.deepcopy(target_desc)
         self.loss_ff_grad = grad(self.construct_loss)
         self.n_descriptors = np.shape(self.target_desc)[1]
@@ -95,8 +96,9 @@ class LossFunction:
 
     @partial(jit, static_argnums=(0,))
     def first_moment(self, current_desc, target_desc):
+        print(type(target_desc))
         current_avg = jnp.average(current_desc, axis=0)
-        target_avg = jnp.average(target_desc, axis=0)
+        target_avg = jnp.average(jnp.array(target_desc), axis=0)
         tst_residual = jnp.sum(jnp.nan_to_num(jnp.abs(current_avg-target_avg)))
         is_zero = jnp.array(jnp.isclose(tst_residual,jnp.zeros(tst_residual.shape)),dtype=int)
         bonus = -jnp.sum(is_zero*(float(self.config.sections['SCORING'].moment_bonus[0])))

@@ -9,8 +9,8 @@ from lammps.mliap.loader import *
 from jax import grad, jit
 from functools import partial
 import numpy as vnp
-from opt_tools.py import *
-from GSQS_protocol import *
+from GRSlib.Ver0_Files.opt_tools import *
+from examples.simple_test.GRS_protocol import *
 #Scoring has to be a class within motion because we want a consistent reference for scores, ans this
 #refrence will be LAMMPS using a constructed potential energy surface from the representation loss function
 n_totconfig = 10
@@ -118,8 +118,82 @@ class Scoring:
 # min and maxatoms the same as maxcellsize?
 # target_comps is in input
 #numelements = num types? 
+    def ensemble_score(self, n_totconfig, data_path, cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global, soft_strength, nelements, n_descs, mask, rand_comp):
+        self.mask = mask  # Generates the multiple structures
+        scores = []  # Initialize a list to store scores
 
-    def ensemble_score(self, n_totconfig, data_path,cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global,soft_strength, nelements,n_descs,mask,rand_comp): 
+        print(f"Starting ensemble_score with {n_totconfig} configurations.")  # Debugging line
+
+        for i in range(1, n_totconfig + 1):
+            print(f"Configuration {i}/{n_totconfig} - Using indices: {mask}")  # Debugging line
+
+        # Generate the cell
+            g = internal_generate_cell(i, desired_size=vnp.random.choice(range(mincellsize, maxcellsize)), template=None, desired_comps=target_comps, use_template=None, min_typ=min_typ_global, soft_strength=soft_strength)
+            print(g)
+            print(f"Cell generated for configuration {i}: {g}")  # Debugging line
+
+            em = GRSModel(nelements, n_descs, mask=mask)
+            sampler = GRSSampler(em, g)
+            em.K_cross = cross_weight
+            em.K_self = self_weight
+
+            print(f"Running minimization for configuration {i}.")  # Debugging line
+        # Run the minimization process
+            sampler.run("minimize 1e-6 1e-6 1000 10000")
+
+            print(f"Minimization completed for configuration {i}. Writing data.")  # Debugging line
+        # Write the data to a file
+            sampler.run("write_data %s/sample.%i.dat " % (data_path, i))
+
+            print(f"Data written for configuration {i}. Updating model.")  # Debugging line
+            sampler.update_model()  # Updating the model combines generated structures
+
+        # Calculate the score for the current configuration
+            score = self.get_score(g)  # Pass the generated structure to get_score
+            print(f"Score for configuration {i}: {score}")  # Debugging line
+
+            if score is None:
+                print(f"Score for configuration {i} is None.")  # Debugging line
+
+            scores.append(score)  # Append the score to the list
+
+        print("Final scores list:", scores)  # Debugging line
+        return scores  # Return the list of scores
+"""def ensemble_score(self, n_totconfig, data_path, cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global, soft_strength, nelements, n_descs, mask, rand_comp):
+        self.mask = mask  # Generates the multiple structures
+        scores = []  # Initialize a list to store scores
+        print(f"Starting ensemble_score with {n_totconfig} configs.")
+        for i in range(1, n_totconfig + 1):
+            print(i, "/", n_totconfig, "Using indices:", mask)
+
+            if not randomize_comps:
+                g = internal_generate_cell(i, desired_size=vnp.random.choice(range(mincellsize, maxcellsize)), template=None, desired_comps=target_comps, use_template=None, min_typ=min_typ_global, soft_strength=soft_strength)
+            else:
+                target_comps_rnd = rand_comp(target_comps)  # Randomize compositions
+                g = internal_generate_cell(i, desired_size=vnp.random.choice(range(mincellsize, maxcellsize)), template=None, desired_comps=target_comps_rnd, use_template=None, min_typ=min_typ_global, soft_strength=soft_strength)
+
+            em = GRSModel(nelements, n_descs, mask=mask)
+            sampler = GRSSampler(em, g)
+            em.K_cross = cross_weight
+            em.K_self = self_weight
+
+        # Run the minimization process
+            sampler.run("minimize 1e-6 1e-6 1000 10000")
+
+        # Write the data to a file
+            sampler.run("write_data %s/sample.%i.dat " % (data_path, i))
+
+            sampler.update_model()  # Updating the model combines generated structures
+
+        # Calculate the score for the current configuration
+            score = self.get_score()  # Assuming get_score is defined to return the score for the current state
+            if score is None:
+                print(f"Score for configuration {i} is None.")
+            scores.append(score)  # Append the score to the list
+        print("Final scores list:", scores)
+        return scores  # Return the list of scores
+"""
+"""    def ensemble_score(self, n_totconfig, data_path,cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global,soft_strength, nelements,n_descs,mask,rand_comp): 
         self.mask=mask#generates the multiple structures -- needs internal generate cell , some of these should be defined in the input file like n_totconfig if they choose multiple and the crossweight and self weigths
         i = 1
         while i <= n_totconfig: 
@@ -140,7 +214,7 @@ class Scoring:
         
         sampler.update_model() #updating the model is how all of the generated structures get combined into one.
     
-
+"""
 # total number of configurations
 #n_totconfig = int(sys.argv[2])
                # self.lmp.command(line)
