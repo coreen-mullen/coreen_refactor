@@ -4,7 +4,7 @@
 FitSNAP - (post library update) 
 ASE - v 3.22.1
 lammps - LAMMPS (post mliap update)
-
+ 
 You must add the fitsnap folder to your PYTHONPATH in order to use
 the ACE descriptor setup functionalities. Otherwise, you must bring your own
 ACE descriptor file (.yace).
