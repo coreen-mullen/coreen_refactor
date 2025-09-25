@@ -1,10 +1,10 @@
+from GRSlib.motion.scoring import Scoring
 import jax.numpy as jnp
 import numpy as np
-from jax import grad, jit, vmap, random
+from jax import grad, jit
 from functools import partial
 import lammps, lammps.mliap
 from lammps.mliap.loader import *
-import copy
 
 class LossFunction:
     def __init__(self, config, current_desc, target_desc, prior_desc):
@@ -15,24 +15,34 @@ class LossFunction:
         #self.target_desc = target_desc.copy() #copy.deepcopy(target_desc)
         self.prior_desc = prior_desc.copy() #copy.deepcopy(target_desc)
         self.loss_ff_grad = grad(self.construct_loss)
+class Moments(Scoring):
+    def __init__(self, *args): #pt, config, target_desc, prior_desc):
+        self.pt, self.config, descriptors = args
+        self.target_desc = descriptors.get('target',None).copy() 
+        self.prior_desc = descriptors.get('prior',None).copy()
         self.n_descriptors = np.shape(self.target_desc)[1]
-        self.n_elements = self.config.sections['BASIS'].numtypes
-        self.grad_loss = grad(self.construct_loss)
         self.mask = list(range(self.n_descriptors))
-        self.mode="update"
+        self.n_params = 1 #Variables LAMMPS needs to know about
+        self.n_elements = self.config.sections['BASIS'].numtypes #Variables LAMMPS needs to know about
+        self.loss_ff_grad = grad(self.construct_loss)
+        self.grad_loss = grad(self.construct_loss)
+        self.mode = "update"
 
-    def __call__(self, elems, current_desc, beta, energy): 
+    def __call__(self, *args):
         #The arguments that this function brings in are super improtant and are expected by LAMMPS MLIAP package.
-        #LAMMPS will populate the descriptors as a per-atom array into current_desc.
+        #They are (elems, current_desc, beta, energy)
+        #Integer values of LAMMPS atom types are in elems
+        #Descriptors as a per-atom array into current_desc.
         #Per-atom forces are expected for beta
         #Per-atom energy is expected for energy, need to do some testing if per-atom values can be reported back.
-        self.n_atoms = np.shape(current_desc)[0]
         if self.mode=="score":     
+            elems, current_desc, beta, energy = args
+            self.n_atoms = np.shape(current_desc)[0]
             score = self.construct_loss(current_desc, self.target_desc)
             energy[:] = 0
             energy[0] = float(self.config.sections["SCORING"].strength_target)*score #Scaled score (energy) between current and target
             forces = self.grad_loss(current_desc, self.target_desc) #Forces between current and target
-            beta[:,:] = 0
+            beta[:,:]= 0
             beta[:,self.mask] = float(self.config.sections["SCORING"].strength_target)*forces #Scaled forces between current and target
 
             score = self.construct_loss(current_desc, self.prior_desc)
@@ -42,8 +52,8 @@ class LossFunction:
             beta[:,self.mask] += float(self.config.sections["SCORING"].strength_prior)*forces #Scaled forces between current and prior
 
         elif self.mode=="update":
-            self.update()
-            beta = self.grad_loss(current_desc, self.target_desc)
+            self.update(args)
+            beta = self.grad_loss(self.target_desc, self.target_desc)
 
 
     def set_mode_update(self):
@@ -52,8 +62,13 @@ class LossFunction:
     def set_mode_score(self):
         self.mode="score"
 
-    def update(self):
-        #print("Updating the loss function given new information")
+    def update(self,*args):
+        pt, config, descriptors = args[0]
+        self.target_desc = descriptors.get('target',None).copy()
+        self.prior_desc = descriptors.get('prior',None).copy()
+        self.n_descriptors = np.shape(self.target_desc)[1]
+        self.mask = list(range(self.n_descriptors))
+
         if self.n_elements > 1:
             self.current_desc = self.current_desc.flatten()
             self.target_desc = self.target_desc.flatten()
@@ -101,7 +116,7 @@ class LossFunction:
         target_avg = jnp.average(jnp.array(target_desc), axis=0)
         tst_residual = jnp.sum(jnp.nan_to_num(jnp.abs(current_avg-target_avg)))
         is_zero = jnp.array(jnp.isclose(tst_residual,jnp.zeros(tst_residual.shape)),dtype=int)
-        bonus = -jnp.sum(is_zero*(float(self.config.sections['SCORING'].moment_bonus[0])))
+        bonus = -jnp.sum(is_zero*(float(self.config.sections['SCORING'].moments_bonus[0])))
         tst_residual_final = tst_residual*float(self.config.sections['SCORING'].moments_coeff[0]) + bonus #MAE + bonus
         return tst_residual_final
 
@@ -111,7 +126,7 @@ class LossFunction:
         target_std = jnp.std(target_desc, axis=0)
         tst_residual = jnp.sum(jnp.nan_to_num(jnp.abs(current_std-target_std)))
         is_zero = jnp.array(jnp.isclose(tst_residual,jnp.zeros(tst_residual.shape)),dtype=int)
-        bonus=-jnp.sum(is_zero*float(self.config.sections['SCORING'].moment_bonus[1]))
+        bonus = -jnp.sum(is_zero*float(self.config.sections['SCORING'].moments_bonus[1]))
         tst_residual_final = tst_residual*float(self.config.sections['SCORING'].moments_coeff[1]) + bonus #MAE + bonus
         return tst_residual_final
 
@@ -130,7 +145,7 @@ class LossFunction:
 
         tst_residual = jnp.sum(jnp.nan_to_num(jnp.abs(current_skew-target_skew)))
         is_zero = jnp.array(jnp.isclose(tst_residual,jnp.zeros(tst_residual.shape)),dtype=int)
-        bonus=-jnp.sum(is_zero*float(self.config.sections['SCORING'].moment_bonus[2]))
+        bonus = -jnp.sum(is_zero*float(self.config.sections['SCORING'].moments_bonus[2]))
         tst_residual_final = tst_residual*float(self.config.sections['SCORING'].moments_coeff[2]) + bonus #MAE + bonus
         return tst_residual_final
 
@@ -147,12 +162,6 @@ class LossFunction:
 
         tst_residual = jnp.sum(jnp.nan_to_num(jnp.abs(current_kurt-target_kurt)))
         is_zero = jnp.array(jnp.isclose(tst_residual,jnp.zeros(tst_residual.shape)),dtype=int)
-        bonus=-jnp.sum(is_zero*float(self.config.sections['SCORING'].moment_bonus[3]))
+        bonus = -jnp.sum(is_zero*float(self.config.sections['SCORING'].moments_bonus[3]))
         tst_residual_final = tst_residual*float(self.config.sections['SCORING'].moments_coeff[3]) + bonus #MAE + bonus
         return tst_residual_final
-
-    @partial(jit, static_argnums=(0,))
-    def first_moment_peratom(self, current_desc, target_desc):
-        target_avg = jnp.average(target_desc, axis=0)
-        tst_residual = jnp.nan_to_num(jnp.abs(current_desc-target_avg))
-        return tst_residual

@@ -4,14 +4,18 @@ from GRSlib.converters.sections.lammps_ace import Ace
 from GRSlib.converters.sections.lammps_base import Base
 #from GRSlib.converters.lammps_snap import Snap
 
-def convert(converter_name, pt, cfg):
+def convert(converter_name, pt, config):
     """Converter Factory from (xyz) to (D)"""
     instance = search(converter_name)
 
-    if cfg.args.verbose:
+    if config.args.verbose:
         pt.single_print("Using {} as Descriptors from".format(converter_name))
 
-    instance.__init__(converter_name, pt, cfg)
+#    attributes = [attr for attr in dir(instance) if not attr.startswith('__')]
+#    print("attr of convert instance:",instance)
+#    print(attributes)
+
+    instance.__init__(converter_name, pt, config)
     return instance
 
 

@@ -8,6 +8,9 @@ class Convert:
         self.pt = pt #ParallelTools()
         self.config = config #Config()
 
+#   Ok technically these functions dont do anything right now, but I'm holding onto them as
+#   boilerplate for the ASE conversions, or descriptor conversions that dont need LAMMPS
+
     def ase_to_lammps(self,data):
         """
         Takes in an ase.Atoms object and writes a lammps-data, returns the file name

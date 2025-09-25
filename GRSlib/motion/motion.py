@@ -1,27 +1,21 @@
-from GRSlib.parallel_tools import ParallelTools
+#from GRSlib.parallel_tools import ParallelTools
+#from GRSlib.motion.scoring_factory import scoring
 from GRSlib.motion.scoring import Scoring
 import numpy as np
 import random
 
-#Scoring has to be a class within motion because we want a consistent reference for scores, ans this
-#refrence will be LAMMPS using a constructed potential energy surface from the representation loss function
+# Two types of motion (aka changes) can be applied to a structure 1) Gradients of the loss function (energy/score) 
+# yielding continuous changes, or 2) genetic moves that are discrete (atom addition/removal, chemical identities).
+# New types can be added as classes if there is need, follow class inheritence of existing motion types.
 
 class Gradient:
 
-    def __init__(self, data, current_desc, target_desc, prior_desc, pt, config):
+#    def __init__(self, data, config, pt, current_desc, target_desc, prior_desc):
+    def __init__(self, pt, config, data, scoring):
         self.pt = pt #ParallelTools()
         self.config = config #Config()
-        #Bring in the target and current descriptors here, will be with self. then
-        #descriptors_flt = descriptors.flatten()
-        self.current_desc = current_desc
-        self.target_desc = target_desc
-        self.prior_desc = prior_desc
         self.data = data
-        self.n_elements = self.config.sections['BASIS'].numtypes
-        if self.n_elements > 1:
-            current_desc = current_desc.flatten()
-            target_desc = target_desc.flatten()
-        self.scoring = Scoring(self.data, self.current_desc, self.target_desc, self.prior_desc, self.pt, self.config)
+        self.scoring = scoring
 
     def fire_min(self):
         #Will construct a set of additional commands to send to LAMMPS before scoring
@@ -88,9 +82,18 @@ class Gradient:
 
 class Genetic:
 
-    def __init__(self, pt, config, **kwargs):
+    def __init__(self, data, current_desc, target_desc, prior_desc, pt, config):
         self.pt = pt #ParallelTools()
         self.config = config #Config()
+        self.current_desc = current_desc
+        self.target_desc = target_desc
+        self.prior_desc = prior_desc
+        self.data = data
+        self.n_elements = self.config.sections['BASIS'].numtypes
+        if self.n_elements > 1:
+            current_desc = current_desc.flatten()
+            target_desc = target_desc.flatten()
+        self.scoring = Scoring(self.data, self.current_desc, self.target_desc, self.prior_desc, self.pt, self.config)
 
     def crossover(parent1, parent2, **kwargs):
         if target_comps or types==None:

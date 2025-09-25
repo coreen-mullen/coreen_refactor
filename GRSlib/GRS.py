@@ -2,6 +2,7 @@ from GRSlib.parallel_tools import ParallelTools
 from GRSlib.io.input import Config
 from GRSlib.converters.convert_factory import convert
 from GRSlib.motion.scoring import Scoring, elems, get_desc_count
+from GRSlib.motion.scoring_factory import scoring
 from GRSlib.motion.motion import Gradient, Genetic
 import random, copy, os, glob, shutil
 import numpy as np
@@ -29,11 +30,15 @@ class GRS:
         self.pt = ParallelTools(comm=comm)
         self.pt.all_barrier()
         self.config = Config(self.pt, input, arguments_lst=arglist)
-        self.convert = convert(self.config.sections['BASIS'].descriptor,self.pt,self.config) 
-        self.target_desc = []
-        self.current_desc = []
-        self.prior_desc = []
 
+        #Set up the generic variables used everwhere
+        self.data = self.config.sections['TARGET'].start_fname
+        desc_types = ["current", "target", "prior"] 
+        self.descriptors = {key: None for key in desc_types}
+
+        #Set up the super functions 
+        self.convert = convert(self.config.sections['BASIS'].descriptor,self.pt,self.config)
+        self.loss_func = scoring(self.config.sections['SCORING'].score_type, self.pt, self.config) # Find out which class to call for loss function
 #       Instantiate other backbone attributes.
 #       self.basis = basis(self.config.sections["BASIS"].descriptor, self.pt, self.config) if "BASIS" in self.config.sections else None
 
@@ -75,16 +80,23 @@ class GRS:
         """
         Accepts a structure (xyz) as input and will return descriptors (D) to be stored and used in conjunction with
         the target, optionally will convert between file types (xyz=lammps-data, ase.Atoms, etc). This is available 
-        whena single structure cannot reproduce the target.
+        when a single structure cannot reproduce the target.
         """
         for data in structs:
             prior_desc = self.convert.run_lammps_single(data)
-            if len(self.prior_desc)==0:
-                self.prior_desc = prior_desc
-            else:
-                self.prior_desc = np.r_[self.prior_desc, prior_desc]
-        np.save('prior.npy', self.prior_desc)
-        return self.prior_desc
+#            print(self.descriptors.get('prior',None))
+#            if self.descriptors.get('prior',None):
+#                self.descriptors['prior'] = prior_desc
+#            else:
+#                self.descriptors['prior'] = np.r_[self.descriptors['prior'], prior_desc]
+            try:
+                self.descriptors['prior'] = np.r_[self.descriptors['prior'], prior_desc]
+            except:
+                self.descriptors['prior'] = prior_desc
+        np.save('prior.npy', self.descriptors['prior'])
+        
+        #pass
+        #return self.descriptors
 
     def update_start(self,data,str_option):
         """
@@ -134,17 +146,18 @@ class GRS:
         #Pass data to, and do something with the functs of scoring
         if self.config.sections['TARGET'].target_fname == None:
             print("Provided target descriptors superceed target data file")
-            self.target_desc = np.load(self.config.sections['TARGET'].target_fdesc)    
+            self.descriptors['target'] = np.load(self.config.sections['TARGET'].target_fdesc)    
         else:
-            self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
-        self.current_desc = self.convert_to_desc(data)
+            self.descriptors['target'] = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
+        self.descriptors['current'] = self.convert_to_desc(data)
         
-        if self.prior_desc == None: 
-            self.prior_desc = self.set_prior(self.config.sections['TARGET'].start_fname)
+        if self.descriptors.get('prior',None)==None: 
+            self.set_prior([self.config.sections['TARGET'].start_fname])
 
-        if (np.shape(self.current_desc[1])==np.shape(self.target_desc[1])):
-            self.score = Scoring(data, self.current_desc, self.target_desc, self.prior_desc, self.pt, self.config) 
-            score = self.score.get_score()
+        if (np.shape(self.descriptors['current'][1])==np.shape(self.descriptors['target'][1])):
+            #Define scoring method now that descriptors and starting data are available
+            self.score = Scoring(self.pt, self.config, self.loss_func, data, self.descriptors) 
+            score = self.score.get_score() 
         else:
             raise RuntimeError(">>> Found unmatched BASIS for target and current descriptors")
             
@@ -209,9 +222,9 @@ class GRS:
         #if data == None:
             #data = self.propose_structure()
 
-        self.current_desc = self.convert_to_desc(data)
-        self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname) 
-        self.genmove = Genetic(data, self.current_desc, self.target_desc, self.pt, self.config) 
+        self.descriptors['current'] = self.convert_to_desc(data)
+        self.descriptors['target'] = self.convert_to_desc(self.config.sections['TARGET'].target_fname) 
+        self.genmove = Genetic(self.pt, self.config, data, self.descriptors) 
         #Dont want to make a func call the default here since the user will define this?
         #Need a fallback to provide a good default if a genetic move is called.
         #self.genmove.tournament_selection()
@@ -234,14 +247,15 @@ class GRS:
         
         if data == None:
             data = self.propose_structure()
-        self.current_desc = self.convert_to_desc(data)
+        self.descriptors['current']= self.convert_to_desc(data)
         if self.config.sections['TARGET'].target_fname == None:
-            print("Provided target descriptors superceed target data file")
-            self.target_desc = np.load(self.config.sections['TARGET'].target_fdesc)    
+            print("Provided target descriptors override target data file")
+            self.descriptors['target'] = np.load(self.config.sections['TARGET'].target_fdesc)    
         else:
-            self.target_desc = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
+            self.descriptors['target'] = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
    
-        self.gradmove = Gradient(data, self.current_desc, self.target_desc, self.prior_desc, self.pt, self.config) 
+        self.score = Scoring(self.pt, self.config, self.loss_func, data, self.descriptors)  # Set scoring class to assign scores to moves
+        self.gradmove = Gradient(self.pt, self.config, data, self.score) #Set desired motion class with scoring attached
         if self.config.sections['MOTION'].min_type == 'fire':
             self.before_score, self.after_score, data = self.gradmove.fire_min()
         elif self.config.sections['MOTION'].min_type == 'line':

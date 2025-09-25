@@ -29,13 +29,13 @@ settings = \
     "strength_target": 1.0, 
     "strength_prior": 0.0, 
     "moments": "mean stdev" ,
-    "moments_coeff": "1.0 0.1",
+    "moments_coeff": "1.0 0.0",
     "moments_bonus": "0 0" ,
     },
 "TARGET":
     {
     "target_fname": "bcc.data",
-    "target_fdesc": "bcc.npy",
+#    "target_fdesc": "fcc.npy",
     "start_fname": "notbcc.data",
     "job_prefix": "TrialGRS"
     },
@@ -52,28 +52,25 @@ settings = \
 
 grs = GRS(settings,comm=comm)
 
-#testing of io class
 #grs.config.view_state()
-#-----------------------
 
-#testing of convert class
-#attributes = [attr for attr in dir(grs.convert) if not attr.startswith('__')]
-#print("attr of grs.convert:")
+#attributes = [attr for attr in dir(grs.gradient_move) if not attr.startswith('__')]
+#print("attr of grs.gradient_move:")
 #print(attributes)
-#current_desc = grs.convert_to_desc('bcc.data')
-#grs.genetic_move.tournament_selection(data=None)
 
-#score = grs.get_score(settings["TARGET"]["start_fname"])
-#print("     Score calculated through LAMMPS:",score)
-#print("Done checking socring!")
+#starting_struc = grs.convert_to_desc(settings["TARGET"]["start_fname"])
 
-updated_struct = settings["TARGET"]["start_fname"]
-grs.set_prior([updated_struct])
+score = grs.get_score(settings["TARGET"]["start_fname"])
+print("     Score calculated through LAMMPS:",score)
 
-for i in range(10):
-#    grs.update_prior()
-    updated_struct = grs.gradient_move(updated_struct)
-    updated_struct = grs.update_start(updated_struct,"MinScore")
-    grs.set_prior(glob.glob(settings['TARGET']["job_prefix"]+"*.data"))
+#updated_struct = settings["TARGET"]["start_fname"]
+#grs.set_prior([updated_struct])
+#print("Updated Prior")
+#updated_struct = grs.gradient_move(updated_struct)
+#print("Made a single gradient move")
+#updated_struct = grs.update_start(updated_struct,"MinScore")
+#print("Updated starting structure")
+#grs.set_prior(glob.glob(settings['TARGET']["job_prefix"]+"*.data"))
+#print("Updated Prior")
 
 exit()
