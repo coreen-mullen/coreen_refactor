@@ -54,6 +54,14 @@ fire_min = False
 line_min = True
 # flag to use randomized compositions for elements in the dictionary: target_comps = {'Cr':1.0 }
 randomize_comps=True
+
+#descriptors_target_1 = np.load('target_descriptors.npy')
+#descriptors_target_2 = np.load('target_var_descriptors.npy')
+
+
+descriptors_target_1 = vnp.random.rand((11))
+descriptors_target_2 = vnp.random.rand((11))
+
 class GRSModel:
     def __init__(self, n_elements, n_descriptors_tot, mask):
         self.mask=mask

@@ -12,7 +12,8 @@ from lammps.mliap.loader import *
 from functools import partial
 import numpy as vnp
 from GRSlib.Ver0_Files.opt_tools import *
-from examples.simple_test.GRS_protocol import *
+from GRSlib.GRS import *
+#from examples.simple_test.GRS_protocol import *
 #Scoring has to be a class within motion because we want a consistent reference for scores, ans this
 #refrence will be LAMMPS using a constructed potential energy surface from the representation loss function
 n_totconfig = 10

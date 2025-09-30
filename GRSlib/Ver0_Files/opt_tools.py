@@ -311,14 +311,16 @@ velocity all create 1. 4928459 dist gaussian""" % typstr
     return s
 
 
-from crystal_enum import *
+#from crystal_enum import *
+from GRSlib.Ver0_Files.crystal_enum import *
 def prim_crystal(elem_list):
     all_prims = get_prim_structs(elem_list, multiatom=False)
     myind = np.random.choice(range(len(all_prims)))
     return all_prims[myind]
 
 
-from hnf import *
+#from hnf import *
+from GRSlib.Ver0_Files.hnf import *
 #elems[0],desired_size,volfrac=1.0,cubic=True,override_lat='fcc',override_a=2.98
 def bulk_template(elem,desired_size,volfrac=1.0,cubic=True,override_lat=None,override_a=None):
     if not override_a:
@@ -407,28 +409,34 @@ def internal_generate_cell(index,desired_size=4,template=None,desired_comps={'Ni
         #from ase.build import bulk
         #from ase import Atoms,Atom
         chems = list(desired_comps.keys())
+        print(f"Generate new template for chemical: {chems[0]} with desired size: {desired_size}.")
         template = Atoms([chems[0]]*desired_size)
         atoms_base = bulk(chems[0])
         vol_base = vnp.dot(vnp.cross(atoms_base.get_cell()[0],atoms_base.get_cell()[1]),atoms_base.get_cell()[2])
         a_simp = vol_base**(1/3)
         #cells = get_hnfs(hnf_trs=[desired_size])
         cells_all = get_hnfs(hnf_trs=[desired_size])
+        print(f"Total cells generated: {len(cells_all)}")
         toli = int((desired_size)**(1/3))
         cells= limit_mats_len(cells_all,desired_size,tol=0.16)
         #print ('ncells',len(cells))
         try:
             cell = a_simp * cells[vnp.random.choice(range(len(cells)))]
+            print(f"Selected cell shape:{cell}")
         except ValueError:
             cell = a_simp * cells_all [vnp.random.choice(range(len(cells_all)))]
+            print("ValueError encountered, using alt. cell.")
         #print ('hnf',cell)
         norms = np.array([np.linalg.norm(k) for k in cell])
         norms /= (desired_size)
+        print(f"Normalized cell dimensions: {norms}")
         #print('hnf norms',norms)
         #cell = a_simp * cells[-2]
         template.set_cell(cell)
         template.set_scaled_positions(vnp.random.uniform(0,1,(desired_size,3)))
+        print(f"Template set with cell dimensions: {template.get_cell()}")
     else:
-        tempalte = template
+        template = template
         
     new_comps = {elem:int(round(len(template)*cmp))/len(template) for elem,cmp in desired_comps.items()}
     print ('for structure of size:%d'% len(template),'desired compositions:', desired_comps,'will be replaced with', new_comps)
