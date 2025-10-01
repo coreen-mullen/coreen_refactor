@@ -1,6 +1,7 @@
 #from GRSlib.parallel_tools import ParallelTools
 from GRSlib.motion.scoring import Scoring
 from GRSlib.motion.lossfunc.moments import Moments
+from GRSlib.motion.lossfunc.entropy import Entropy
 #   from GRSlib.motion.lossfunc.moments import *
 
 # Need to direct the scoring class to the appropiate loss function generator, this will connect
@@ -10,7 +11,6 @@ from GRSlib.motion.lossfunc.moments import Moments
 def scoring(lossff_name, pt, config):
     """Scoring Factory for custom loss functions"""
     instance = search(lossff_name)
-
     if config.args.verbose:
         pt.single_print("Calling {} for structure scoring".format(lossff_name))
     

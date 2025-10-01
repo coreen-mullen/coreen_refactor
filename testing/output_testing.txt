@@ -1,0 +1,66 @@
+Atoms(symbols='W54', pbc=True, cell=[9.5412, 9.5412, 9.5412], id=..., masses=..., type=...)
+W54.lammps-data
+[[ 7.31642122e+00  2.04804838e+00  5.69227998e+00 ...  1.62572923e-47
+   1.40235461e-46 -1.42092934e-47]
+ [ 7.31642122e+00  2.04804838e+00  5.69227998e+00 ... -3.52601709e-31
+  -9.97546152e-31 -3.20283905e-31]
+ [ 7.31642122e+00  2.04804838e+00  5.69227998e+00 ... -2.86285401e-31
+  -9.31051337e-31 -5.42318743e-31]
+ ...
+ [ 7.31642122e+00  2.04804838e+00  5.69227998e+00 ... -1.64121296e-32
+  -7.22565201e-31 -9.39072206e-31]
+ [ 7.31642122e+00  2.04804838e+00  5.69227998e+00 ...  1.15983467e-31
+  -5.71390715e-31  2.28963706e-31]
+ [ 7.31642122e+00  2.04804838e+00  5.69227998e+00 ...  3.30497329e-31
+  -2.63866516e-31  1.98391114e-31]]
+testing
+<class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>
+<class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>
+<class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>
+!!!
+get ensemble called.
+Using elems: ['W']
+Ensemble Target
+Starting ensemble_score with 10 configurations.
+Configuration 1/10 - Using indices: None
+Generate new template for chemical: W with desired size: 54.
+Total cells generated: 8470
+Selected cell shape:[[ 7.52428099  0.          0.        ]
+ [ 5.01618732  7.52428099  0.        ]
+ [ 7.52428099 10.03237465 15.04856197]]
+Normalized cell dimensions: [0.13933854 0.16746408 0.36275625]
+Template set with cell dimensions: Cell([[7.5242809863292655, 0.0, 0.0], [5.01618732421951, 7.5242809863292655, 0.0], [7.5242809863292655, 10.03237464843902, 15.048561972658531]])
+for structure of size:54 desired compositions: {'W': 1.0} will be replaced with {'W': 1.0}
+doing cheap fix for cell size
+
+units           metal
+boundary        p p p
+
+read_data  ats_1.data
+
+log log_1.lammps
+mass 1 183.840000
+pair_style hybrid/overlay soft 2.592 mliap model mliappy LATER descriptor ace coupling_coefficients.yace
+pair_coeff * * soft 0.000000
+pair_coeff * * mliap   W
+
+thermo 10
+velocity all create 1. 4928459 dist gaussian
+fix 1b all box/relax iso 0.0 vmax 0.001
+Cell generated for configuration 1: 
+units           metal
+boundary        p p p
+
+read_data  ats_1.data
+
+log log_1.lammps
+mass 1 183.840000
+pair_style hybrid/overlay soft 2.592 mliap model mliappy LATER descriptor ace coupling_coefficients.yace
+pair_coeff * * soft 0.000000
+pair_coeff * * mliap   W
+
+thermo 10
+velocity all create 1. 4928459 dist gaussian
+fix 1b all box/relax iso 0.0 vmax 0.001
+An error occurred while calculating the ensemble score: object of type 'NoneType' has no len()
+Ensemble Scores: None

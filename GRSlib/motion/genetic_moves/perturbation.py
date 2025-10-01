@@ -1,16 +1,17 @@
+import ase
 from ase import Atoms,Atom
 from ase.io import read,write
 from ase.ga.utilities import closest_distances_generator, CellBounds
 from ase.data import atomic_numbers, atomic_names, atomic_masses, covalent_radii
 from ase.neighborlist import primitive_neighbor_list
 
+# Lowest level functions that can be used to modif structures, inherited class not needed since scoring will happen in
+# motion/genetic.py. This collection of functions is mostly to avoid clustter and massive files where more abstract 
+# things are happening.
 
 def perturb_one_atom(atoms,scale=0.5,max_attempt=100,apply_to='ase'):
+    #TODO Currently this is a copy/paste of the old code, needs work.
     if apply_to == 'ase':
-        from ase.ga.utilities import closest_distances_generator
-        from ase.data import atomic_numbers
-        import ase
-        import ase.neighborlist
         cutoffs = ase.neighborlist.natural_cutoffs(atoms)
         sym_num_map = {sym:atomic_numbers[sym] for sym in atoms.symbols}
         #nl = ase.neighborlist.neighbor_list('ijd', atoms, max(cutoffs))
@@ -64,10 +65,7 @@ def perturb_one_atom(atoms,scale=0.5,max_attempt=100,apply_to='ase'):
         return new_atoms
 
 def perturb_N_atoms(atoms,scale=0.5,max_attempt = 100, fraction=0.25):
-    from ase.ga.utilities import closest_distances_generator
-    from ase.data import atomic_numbers
-    import ase
-    import ase.neighborlist
+    #TODO Currently this is a copy/paste of the old code, needs work.
     cutoffs = ase.neighborlist.natural_cutoffs(atoms)
     sym_num_map = {sym:atomic_numbers[sym] for sym in atoms.symbols}
     #nl = ase.neighborlist.neighbor_list('ijd', atoms, max(cutoffs))

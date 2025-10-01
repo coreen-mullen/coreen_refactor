@@ -5,7 +5,11 @@ from ase.ga.startgenerator import StartGenerator
 from ase.data import atomic_numbers, atomic_names, atomic_masses, covalent_radii
 from ase.neighborlist import primitive_neighbor_list
 
+# Lowest level functions that can be used to modif structures, inherited class not needed since scoring will happen in
+# motion/genetic.py. This collection of functions is mostly to avoid clustter and massive files where more abstract 
+# things are happening.
 def add_atom(atoms,symbols,tol = 0.5):
+    #TODO Currently this is a copy/paste of the old code, needs work.
     blmin = closest_distances_generator(atom_numbers=[atomic_numbers[symbol] for symbol in symbols] + [atomic_numbers['Ne']], ratio_of_covalent_radii=0.5)
     def readd():
         symbol = vnp.random.choice(symbols)
@@ -49,7 +53,8 @@ def add_atom(atoms,symbols,tol = 0.5):
     atoms.append(Atom(symbol,rnd_pos))
     return atoms
 
-def remove_atom(atoms,symbols,tol = 0.5): #removes one random atom
+def remove_atom(atoms,symbols,tol = 0.5):
+    #TODO Currently this is a copy/paste of the old code, needs work.
     blmin = closest_distances_generator(atom_numbers=[atomic_numbers[symbol] for symbol in symbols] + [atomic_numbers['Ne']], ratio_of_covalent_radii=0.5)
     remove_index = vnp.random.choice(len(atoms))
     remove = atoms[remove_index]

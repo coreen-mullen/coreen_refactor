@@ -1,7 +1,15 @@
 from GRSlib.io.sections.error import ExitFunc
-from distutils.util import strtobool
+#from distutils.util import strtobool
 from os import getcwd, path
 
+def strtobool(val):    #distutils.util strtobool deprecated in python3.12
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
 
 class Section:
     parameters = []

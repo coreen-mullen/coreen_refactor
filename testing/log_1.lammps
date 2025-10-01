@@ -1,0 +1,37 @@
+mass 1 183.840000
+pair_style hybrid/overlay soft 2.592 mliap model mliappy LATER descriptor ace coupling_coefficients.yace
+Loading python model deferred.
+pair_coeff * * soft 0.000000
+pair_coeff * * mliap   W
+
+thermo 10
+velocity all create 1. 4928459 dist gaussian
+fix 1b all box/relax iso 0.0 vmax 0.001
+Loading python model complete.
+minimize 1e-6 1e-6 1000 10000
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 7.5
+  ghost atom cutoff = 7.5
+  binsize = 3.75, bins = 4 2 7
+  2 neighbor lists, perpetual/occasional/extra = 2 0 0
+  (1) pair soft, perpetual, half/full from (2)
+      attributes: half, newton on
+      pair build: halffull/newton/tri
+      stencil: none
+      bin: none
+  (2) pair mliap, perpetual
+      attributes: full, newton on, cut 7.5
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+ (src/min.cpp:222)
+Per MPI rank memory allocation (min/avg/max) = 5.5 | 5.5 | 5.5 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press          Volume    
+         0   1             -nan            0             -nan           -nan            851.97139    
+ERROR: Non-numeric pressure - simulation unstable
+For more information see https://docs.lammps.org/err0006 (src/fix_box_relax.cpp:703)
+Last input line: minimize 1e-6 1e-6 1000 10000
+Total wall time: 0:00:00

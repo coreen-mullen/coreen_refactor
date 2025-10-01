@@ -207,7 +207,7 @@ class ParallelTools():
 
     def _set_seed(self):
         if self._rank == 0.0:
-            self._seed = randint(0, 1e5)
+            self._seed = randint(0, 100000)
         if self.stubs == 0:
             self._seed = self._comm.bcast(self._seed)
 

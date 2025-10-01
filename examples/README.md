@@ -1,19 +1,10 @@
 #examples
 
-### simple_test
-simple example with GRS optimization (for local minima) in one script
+### SimpleGradient_BCC
+Uses the moments of ACE descriptor distributions to construct the loss function used by LAMMPS.
+Energy (loss) minimization is performed by LAMMPS taking a defective BCC structure back to BCC.
 
-### four_element_alloy
-many examples (using the multiple script workflow) to execute the
-GRS optimization (for local minima) through lammps
+### EntropyMaximizing
+Constructs a loss function based on the information entropy of descriptors contained within a structure.
+This loss function (energy) is used by LAMMPS to find structures that maximize the internal information entropy.
 
-### other_enumeration
-non-GRS methods to enumerate atomic structures (for reference or to specify as candidate types)
-
-### global_optimization
-global optimization methods (genetic algorithms and simulated annealing)
-to later wrap the lammps  local minima workflows
-
-### latest_local_optimization 
-GRS optimization (for local minima) script used to generate figures for 
-Cr-Fe-Si-V slide

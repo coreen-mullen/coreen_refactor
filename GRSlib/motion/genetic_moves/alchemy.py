@@ -4,7 +4,12 @@ from ase.ga.utilities import closest_distances_generator, CellBounds
 from ase.data import atomic_numbers, atomic_names, atomic_masses, covalent_radii
 from ase.neighborlist import primitive_neighbor_list
 
+# Lowest level functions that can be used to modif structures, inherited class not needed since scoring will happen in
+# motion/genetic.py. This collection of functions is mostly to avoid clustter and massive files where more abstract 
+# things are happening.
+
 def flip_one_atom(atoms,types,endpoint_compositions=False):
+    #TODO Currently this is a copy/paste of the old code, needs work.
     if endpoint_compositions:
         new_atoms = atoms.copy()
         flip_ind = np.random.randint(0,len(atoms))
@@ -31,6 +36,7 @@ def flip_one_atom(atoms,types,endpoint_compositions=False):
     return new_atoms
 
 def flip_N_atoms(atoms,types,fraction=None,endpoint_compositions=False):
+    #TODO Currently this is a copy/paste of the old code, needs work.
     if endpoint_compositions:
         fraction = np.random.rand()
         pert_inds = np.random.choice(range(len(atoms)),size=int(len(atoms)*fraction) )

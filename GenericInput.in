@@ -29,11 +29,11 @@ moments = mean
 #stdev skew  kurt
 moments_coeff = 1 
 #0.1 0.01 0.001 
-moment_bonus = 1 
+moments_bonus = 1 
 #5 10 20
-moments_cross_coeff = 1 
+#moments_cross_coeff = 1 
 #0.1 0.01 0.001 
-moment_cross_bonus = 1 
+#moment_cross_bonus = 1 
 #5 10 20 
 #attractor_target = True
 exact_distribution = False # Read in a stock structure and match exactly

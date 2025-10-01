@@ -34,15 +34,6 @@ print(descs)
 atoms = bulk('W','bcc',cubic=True)
 write('simple_bcc.data',atoms,format='lammps-data')
 
-#atoms = grs.convert.lammps_to_ase('bcc.data')
-#print(atoms)
-#file = grs.convert.ase_to_lammps(atoms)
-#print(file)
-#grs.convert.run_lammps_single('bcc.data')
-#current_desc = grs.convert_to_desc(file)
-#-----------------------
-#grs.genetic_move.tournament_selection(data=None)
-
 #grs.current_desc = current_desc
 #grs.random_values = np.random.rand(*current_desc.shape)
 print('testing')

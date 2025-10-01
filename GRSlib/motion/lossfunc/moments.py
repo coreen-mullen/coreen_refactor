@@ -3,8 +3,6 @@ import jax.numpy as jnp
 import numpy as np
 from jax import grad, jit
 from functools import partial
-import lammps, lammps.mliap
-from lammps.mliap.loader import *
 
 class LossFunction:
     def __init__(self, config, current_desc, target_desc, prior_desc):
@@ -38,6 +36,8 @@ class Moments(Scoring):
         if self.mode=="score":     
             elems, current_desc, beta, energy = args
             self.n_atoms = np.shape(current_desc)[0]
+
+            #TODO Explain
             score = self.construct_loss(current_desc, self.target_desc)
             energy[:] = 0
             energy[0] = float(self.config.sections["SCORING"].strength_target)*score #Scaled score (energy) between current and target
@@ -45,6 +45,7 @@ class Moments(Scoring):
             beta[:,:]= 0
             beta[:,self.mask] = float(self.config.sections["SCORING"].strength_target)*forces #Scaled forces between current and target
 
+            #TODO Explain
             score = self.construct_loss(current_desc, self.prior_desc)
 #            energy[0] += float(self.config.sections["SCORING"].strength_prior)*score #Scaled score (energy) between current and prior
 #            print("     Target, Prior Scores: ", energy[0], score)
