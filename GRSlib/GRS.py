@@ -166,7 +166,7 @@ class GRS:
             raise RuntimeError(">>> Found unmatched BASIS for target and current descriptors")
             
         return score
-    def get_ensemble(self,data):
+    def get_ensemble(self,data): 
         print("get ensemble called.")
         print("Using elems:",elems)
         print("Ensemble Target")
