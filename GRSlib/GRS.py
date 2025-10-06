@@ -167,7 +167,7 @@ class GRS:
             
         return score
     def get_ensemble(self,data):
-        print("get ensemble called.")
+        print("Get ensemble called.")
         print("Using elems:",elems)
         print("Ensemble Target")
         scores=None

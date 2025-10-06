@@ -149,8 +149,7 @@ class Scoring:
         # Run the minimization process
             sampler.run("minimize 1e-6 1e-6 1000 10000")
 
-            print(f"Minimization completed for configuration {i}. Writing data.")  # Debugging line
-        # Write the data to a file
+            print(f"Minimization completed for configuration {i}. Writing data.")  
             sampler.run("write_data %s/sample.%i.dat " % (data_path, i))
 
             print(f"Data written for configuration {i}. Updating model.")  # Debugging line
