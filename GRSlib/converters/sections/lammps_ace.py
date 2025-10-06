@@ -23,7 +23,7 @@ class Ace(Convert):
 
         compute_name='pace'
         numtypes = len(self.config.sections['BASIS'].elements)
-        base_pace = "compute %s all pace coupling_coefficients.yace %s %s" % (compute_name,self.config.sections['BASIS'].bikflag,self.config.sections['BASIS'].dgradflag)
+        base_pace = "compute %s all pace coupling_coefficients.yace %d %d" % (compute_name,self.config.sections['BASIS'].bikflag,self.config.sections['BASIS'].dgradflag)
         self._lmp.command(base_pace)
         return compute_name
 
@@ -51,8 +51,7 @@ class Ace(Convert):
             elems = elemstr4.split()
             nelements = len(elems)
             desclines = [line for line in lines if 'mu0' in line]
-        
-        #ncols_pace = int(len(desclines)/nelements)
+
         ncols_pace = int(len(desclines)/nelements) + nelements 
         nrows_pace = num_atoms
         lmp_pace = _extract_compute_np(self._lmp, "pace", 0, 2, (nrows_pace, ncols_pace))

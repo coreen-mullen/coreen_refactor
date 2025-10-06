@@ -1,10 +1,11 @@
 from GRSlib.parallel_tools import ParallelTools
 from GRSlib.io.input import Config
 from GRSlib.converters.convert_factory import convert
+from GRSlib.motion.scoring import Scoring, elems, get_desc_count
 from GRSlib.motion.scoring_factory import scoring
+from GRSlib.motion.motion import Gradient, Genetic
 from GRSlib.motion.scoring import Scoring
 from GRSlib.motion.motion import Gradient, Optimize, Create
-
 import random, copy, os, glob, shutil
 import numpy as np
 
@@ -165,6 +166,38 @@ class GRS:
             raise RuntimeError(">>> Found unmatched BASIS for target and current descriptors")
             
         return score
+    def get_ensemble(self,data):
+        print("get ensemble called.")
+        print("Using elems:",elems)
+        print("Ensemble Target")
+        scores=None
+        try:
+            scores = self.score.ensemble_score(
+                n_totconfig=10,  # Example value
+                data_path='bcc.data',  # Example value
+                cross_weight=1.0,
+                self_weight=1.0,
+                randomize_comps=False,
+                mincellsize=54,
+                maxcellsize=55,
+                target_comps={'W': 1.0},  # Ensure this is a dictionary
+                min_typ_global='box',
+                soft_strength=0.0,
+                nelements=len(elems),  # Ensure elems is defined
+                n_descs=get_desc_count('coupling_coefficients.yace'),  # Ensure this function is defined
+                mask=None,  # Set this as needed
+                rand_comp=1)  # Ensure this is defined correctly
+            print("Scores returned from ensemble_score:", scores)
+        except Exception as e:
+            print(f"An error occurred while calculating the ensemble score: {e}")
+            return None  # Optionally return None or handle the error as needed
+            # Check if score was calculated
+        if scores is None or len(scores) == 0:
+            print("No scores were calculated returning None")
+            raise RuntimeError("Ensemble score could not be calculated.")
+
+        return scores  # Ensure you return the score
+#""" self.score = Scoring(data, self.current_desc, self.target_desc, self.prior_desc, self.pt, self.config)score = self.score.ensemble_score() return score"""
 
     def propose_structure(self):
         """
@@ -187,21 +220,17 @@ class GRS:
         #3) Hybridize, Mutate based on set of rules and probabilities
         #4) Store socring information with best-of-generation and best-overall isolated
         #5) Loop until generation limit or scoring residual below threshold
-        if data == None:
-            data = self.propose_structure()
-        self.descriptors['current']= self.convert_to_desc(data)
-        try:
-            self.descriptors['target'] = np.load(self.config.sections['TARGET'].target_fdesc)    
-        except:
-            self.descriptors['target'] = self.convert_to_desc(self.config.sections['TARGET'].target_fname)
-   
-        self.score = Scoring(self.pt, self.config, self.loss_func, data, self.descriptors)  # Set scoring class to assign scores to moves
-        self.genmove = Optimize(self.pt, self.config, self.score) #Set desired motion class with scoring attached
-        
-        
-        #self.genmove.tournament_selection()
-        #for iterations in top_candidates[1], convert.ase_to_lammps
-        #self.write_output()
+        print("Called Genetic_Move")
+        if self.current_desc is None:
+            self.current_desc = self.propose_structure()
+        #if data == None:
+            #data = self.propose_structure()
+
+        self.descriptors['current'] = self.convert_to_desc(data)
+        self.descriptors['target'] = self.convert_to_desc(self.config.sections['TARGET'].target_fname) 
+        self.genmove = Genetic(self.pt, self.config, data, self.descriptors) 
+        #Dont want to make a func call the default here since the user will define this?
+        #Need a fallback to provide a good default if a genetic move is called.
 
 #    @self.pt.single_timeit 
     def gradient_move(self,data):

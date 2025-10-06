@@ -1,5 +1,4 @@
 from GRSlib.io.sections.sections import Section
-
 #pt = ParallelTools()
 #output = Output()
 class Scoring(Section):
@@ -28,4 +27,5 @@ class Scoring(Section):
             # Strength of interactions with prior structures.
             # Positive value attracts current structure to priors, negative value promotes diversity (higher entropy)
         self.delete()
+
 

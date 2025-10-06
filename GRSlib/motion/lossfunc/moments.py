@@ -4,6 +4,15 @@ import numpy as np
 from jax import grad, jit
 from functools import partial
 
+class LossFunction:
+    def __init__(self, config, current_desc, target_desc, prior_desc):
+        self.n_params = 1
+        self.config = config
+        self.current_desc = current_desc.copy()
+        self.target_desc = jnp.array(target_desc)
+        #self.target_desc = target_desc.copy() #copy.deepcopy(target_desc)
+        self.prior_desc = prior_desc.copy() #copy.deepcopy(target_desc)
+        self.loss_ff_grad = grad(self.construct_loss)
 class Moments(Scoring):
     def __init__(self, *args): #pt, config, target_desc, prior_desc):
         self.pt, self.config, descriptors = args
@@ -103,8 +112,9 @@ class Moments(Scoring):
 
     @partial(jit, static_argnums=(0,))
     def first_moment(self, current_desc, target_desc):
+        print(type(target_desc))
         current_avg = jnp.average(current_desc, axis=0)
-        target_avg = jnp.average(target_desc, axis=0)
+        target_avg = jnp.average(jnp.array(target_desc), axis=0)
         tst_residual = jnp.sum(jnp.nan_to_num(jnp.abs(current_avg-target_avg)))
         is_zero = jnp.array(jnp.isclose(tst_residual,jnp.zeros(tst_residual.shape)),dtype=int)
         bonus = -jnp.sum(is_zero*(float(self.config.sections['SCORING'].moments_bonus[0])))
