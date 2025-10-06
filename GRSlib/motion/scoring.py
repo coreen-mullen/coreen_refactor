@@ -130,15 +130,6 @@ class Scoring:
         self.mask = mask  # Generates the multiple structures
         scores = []  # Initialize a list to store scores
         
-<<<<<<< HEAD
-        print(f"Starting ensemble_score with {n_totconfig} configurations.")
-
-        for i in range(1, n_totconfig + 1):
-            print(f"Configuration {i}/{n_totconfig} - Using indices: {mask}")
-            g = internal_generate_cell(i, desired_size=vnp.random.choice(range(mincellsize, maxcellsize)), template=None, desired_comps=target_comps, use_template=None, min_typ=min_typ_global, soft_strength=soft_strength)
-            print(g)
-            print(f"Cell generated for configuration {i}:{g}") 
-=======
         print(f"Starting ensemble_score with {n_totconfig} configurations.")  # Debugging line
 
         for i in range(1, n_totconfig + 1):
@@ -148,7 +139,6 @@ class Scoring:
             g = internal_generate_cell(i, desired_size=vnp.random.choice(range(mincellsize, maxcellsize)), template=None, desired_comps=target_comps, use_template=None, min_typ=min_typ_global, soft_strength=soft_strength)
             print(g)
             print(f"Cell generated for configuration {i}: {g}")  # Debugging line
->>>>>>> 2c5dd56aab132bb819583d049c5dd343714f8214
 
             em = GRSModel(nelements, n_descs, mask=mask)
             sampler = GRSSampler(em, g)
@@ -159,8 +149,7 @@ class Scoring:
         # Run the minimization process
             sampler.run("minimize 1e-6 1e-6 1000 10000")
 
-            print(f"Minimization completed for configuration {i}. Writing data.")  # Debugging line
-        # Write the data to a file
+            print(f"Minimization completed for configuration {i}. Writing data.")  
             sampler.run("write_data %s/sample.%i.dat " % (data_path, i))
 
             print(f"Data written for configuration {i}. Updating model.")  # Debugging line
