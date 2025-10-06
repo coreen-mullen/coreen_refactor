@@ -167,7 +167,11 @@ class GRS:
             
         return score
     def get_ensemble(self,data):
+<<<<<<< HEAD
         print("Get ensemble called.")
+=======
+        print("get ensemble called.")
+>>>>>>> 2c5dd56aab132bb819583d049c5dd343714f8214
         print("Using elems:",elems)
         print("Ensemble Target")
         scores=None
@@ -191,6 +195,10 @@ class GRS:
         except Exception as e:
             print(f"An error occurred while calculating the ensemble score: {e}")
             return None  # Optionally return None or handle the error as needed
+<<<<<<< HEAD
+=======
+            # Check if score was calculated
+>>>>>>> 2c5dd56aab132bb819583d049c5dd343714f8214
         if scores is None or len(scores) == 0:
             print("No scores were calculated returning None")
             raise RuntimeError("Ensemble score could not be calculated.")

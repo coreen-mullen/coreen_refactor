@@ -1,0 +1,22 @@
+# ignoring run example files
+examples/*
+
+# ignoring built test docs
+docs/build/
+
+# ignoring VS Code workspace file
+*.code-workspace
+
+# ignoring .pyc files
+*.pyc
+
+# ignoring outputs
+
+# ignoring intermediate files
+*.swp
+
+# ignore MacOS generated files
+*.DS_Store
+
+#ignore openmpi folder
+testing/openmpi-4.1.1/

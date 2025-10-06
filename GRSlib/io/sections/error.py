@@ -1,0 +1,3 @@
+class ExitFunc(Exception):
+    pass
+

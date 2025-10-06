@@ -1,0 +1,72 @@
+What are the unit features of this code?
+    Convert between (xyz) and (D)
+    Create random or designated structures (xyz)
+    I/O of structures (xyz)
+    Construct fictitious potential energy surfaces based on (D,D*)
+    Single point (xyz, D) evaluation 
+
+
+What would a user want from this code?
+    Generate a set of structures that would constitute a training set for a given material.
+    Reproduction of a large structure into a set of DFT-sized structures.
+    'Augment Existing' training set where holes are filled in
+
+Nomenclature:
+(xyz) is the cartesian representation of a structure
+(D) is the descriptor vector reprensentation of a structure
+(xyz*) and (D*) represent the target structure, or set of target structures
+
+------------------------------
+Information flow of an example run:
+
+Read in user-defined inputs from config file -> Stores as dictionary
+Read in target structure(s) as (xyz*) -> Stores as dictionary
+Convert target structure(s) from (xyz*) to (D*) -> Calls LAMMPS, returns npy array
+Calculate moments of (D*)
+
+Construct or read in starting structure -> Stores as dictionary
+Convert starting structure from (xyz) to (D) -> Calls LAMMPS, returns npy array
+
+Construct loss function (need to think on how to flexibly implement this, just define moments up to some point for now)
+
+One of three options now:
+    1) 
+Begin optimization
+
+------------------------------
+Representative input file:
+
+[GENERATE] #This should override other sections if present, returns a set of stock structures
+composition = (A:0.5, B:0.5)
+count = #
+
+
+[TARGET]
+filetype = (lammps data, lammps dump, ase atoms, xyz)
+(take from Fitsnap groups section)
+stock structure / No target
+
+[MOTION]
+opt_type = GA, Minimize
+GA_accept = [0-1]
+GA_moves = (chemical, cell, position)
+GA_generations = #
+GA_populations = #
+MIN_repulsion = soft/zbl/other (can take from fitsnap reference potential)
+
+
+[BASIS]
+(take from fitsnap ACE section)
+
+[SCORING]
+moments = mean, std, skew, kurt
+moments_coeff = #,#,#,#
+single/ensemble
+structure count limit
+structure size limit
+perfect match bonus
+
+------------------------------
+
+Before running:
+export PYTHONPATH=${PYTHONPATH}:/home/mitwood/Documents/StructureGeneration/Fork:/home/mitwood/Documents/StructureGeneration/Fork/lib:/home/mitwood/Documents/FitSNAP3/master/
