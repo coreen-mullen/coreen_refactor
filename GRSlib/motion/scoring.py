@@ -130,7 +130,7 @@ class Scoring:
         self.mask = mask  # Generates the multiple structures
         scores = []  # Initialize a list to store scores
         
-        print(f"Starting ensemble_score with {n_totconfig} configurations.")  # Debugging line
+        print(f"Starting ensemble_score with {n_totconfig} configurations.")  
 
         for i in range(1, n_totconfig + 1):
             print(f"Configuration {i}/{n_totconfig} - Using indices: {mask}")  # Debugging line

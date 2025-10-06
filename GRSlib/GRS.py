@@ -180,10 +180,10 @@ class GRS:
                 randomize_comps=False,
                 mincellsize=54,
                 maxcellsize=55,
-                target_comps={'W': 1.0},  # Ensure this is a dictionary
+                target_comps={'W': 1.0},  
                 min_typ_global='box',
                 soft_strength=0.0,
-                nelements=len(elems),  # Ensure elems is defined
+                nelements=len(elems),  
                 n_descs=get_desc_count('coupling_coefficients.yace'),  # Ensure this function is defined
                 mask=None,  # Set this as needed
                 rand_comp=1)  # Ensure this is defined correctly
