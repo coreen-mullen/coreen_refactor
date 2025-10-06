@@ -184,9 +184,9 @@ class GRS:
                 min_typ_global='box',
                 soft_strength=0.0,
                 nelements=len(elems),  # Ensure elems is defined
-                n_descs=get_desc_count('coupling_coefficients.yace'),  # Ensure this function is defined
+                n_descs=get_desc_count('coupling_coefficients.yace'),  
                 mask=None,  # Set this as needed
-                rand_comp=1)  # Ensure this is defined correctly
+                rand_comp=1)  
             print("Scores returned from ensemble_score:", scores)
         except Exception as e:
             print(f"An error occurred while calculating the ensemble score: {e}")
