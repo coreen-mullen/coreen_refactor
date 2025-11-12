@@ -122,7 +122,7 @@ class Scoring:
 #internal generate cell is only used in scoring.py but defined in opt_tools + gsqsmodel only in scoring.py currently
 #class ensemble_score(): #will take in the target, and compare it to multiple generated structures -- look at fitsnap sections
 # min and maxatoms the same as maxcellsize?
-# target_comps is in input
+# target_comps is in input 
 #numelements = num types? 
     def ensemble_score(self, n_totconfig, data_path, cross_weight, self_weight, randomize_comps, mincellsize, maxcellsize, target_comps, min_typ_global, soft_strength, nelements, n_descs, mask, rand_comp):
         if mask == None:
